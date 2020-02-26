@@ -53,7 +53,6 @@ class FundType extends AbstractType
 
         $builder
             ->add('name')
-            ->add('description')
             ->add('person', EntityType::class, [
                 'class'       => Person::class,
                 'choices'     => $personRepo->findByUser($user),
@@ -61,6 +60,7 @@ class FundType extends AbstractType
                 'placeholder' => '---',
                 'required'    => true,
             ])
+            ->add('description')
             ->add('icon')
             ->add('initialBalance', NumberType::class, [
                 'scale' => 2,
