@@ -66,7 +66,7 @@ class Person implements Identifiable
     /**
      * @var ArrayCollection
      *
-     * @ORM\OneToMany(targetEntity="App\Entity\Fund", mappedBy="person")
+     * @ORM\OneToMany(targetEntity="App\Entity\Fund", mappedBy="person", orphanRemoval=true)
      */
     private $funds;
 
