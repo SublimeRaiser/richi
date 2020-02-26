@@ -71,6 +71,13 @@ class Person implements Identifiable
     private $funds;
 
     /**
+     * @var ArrayCollection
+     *
+     * @ORM\OneToMany(targetEntity="App\Entity\Debt", mappedBy="person", orphanRemoval=true)
+     */
+    private $debts;
+
+    /**
      * @var \DateTimeInterface
      *
      * @ORM\Column(type="datetime")
@@ -90,6 +97,7 @@ class Person implements Identifiable
     public function __construct()
     {
         $this->funds     = new ArrayCollection();
+        $this->debts     = new ArrayCollection();
 
         $now             = new \DateTime();
         $this->createdAt = $now;
@@ -227,6 +235,47 @@ class Person implements Identifiable
             // set the owning side to null (unless already changed)
             if ($fund->getPerson() === $this) {
                 $fund->setPerson(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Debt[]
+     */
+    public function getDebts(): Collection
+    {
+        return $this->debts;
+    }
+
+    /**
+     * @param Debt $debt
+     *
+     * @return Person
+     */
+    public function addDebt(Debt $debt): self
+    {
+        if (!$this->debts->contains($debt)) {
+            $this->debts[] = $debt;
+            $debt->setPerson($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param Debt $debt
+     *
+     * @return Person
+     */
+    public function removeDebt(Debt $debt): self
+    {
+        if ($this->debts->contains($debt)) {
+            $this->debts->removeElement($debt);
+            // set the owning side to null (unless already changed)
+            if ($debt->getPerson() === $this) {
+                $debt->setPerson(null);
             }
         }
 

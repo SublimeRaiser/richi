@@ -91,6 +91,13 @@ class User implements UserInterface
     private $funds;
 
     /**
+     * @var ArrayCollection
+     *
+     * @ORM\OneToMany(targetEntity="App\Entity\Debt", mappedBy="user", orphanRemoval=true)
+     */
+    private $debts;
+
+    /**
      * @var \DateTimeInterface
      *
      * @ORM\Column(type="datetime")
@@ -115,6 +122,7 @@ class User implements UserInterface
         $this->categories = new ArrayCollection();
         $this->tags       = new ArrayCollection();
         $this->funds      = new ArrayCollection();
+        $this->debts      = new ArrayCollection();
 
         $now              = new \DateTime();
         $this->createdAt  = $now;
@@ -470,6 +478,47 @@ class User implements UserInterface
             // set the owning side to null (unless already changed)
             if ($fund->getUser() === $this) {
                 $fund->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Debt[]
+     */
+    public function getDebts(): Collection
+    {
+        return $this->debts;
+    }
+
+    /**
+     * @param Debt $debt
+     *
+     * @return User
+     */
+    public function addDebt(Debt $debt): self
+    {
+        if (!$this->debts->contains($debt)) {
+            $this->debts[] = $debt;
+            $debt->setUser($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param Debt $debt
+     *
+     * @return User
+     */
+    public function removeDebt(Debt $debt): self
+    {
+        if ($this->debts->contains($debt)) {
+            $this->debts->removeElement($debt);
+            // set the owning side to null (unless already changed)
+            if ($debt->getUser() === $this) {
+                $debt->setUser(null);
             }
         }
 
