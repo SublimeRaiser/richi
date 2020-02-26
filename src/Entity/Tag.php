@@ -57,7 +57,7 @@ class Tag
     private $description;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Operation", mappedBy="tag")
+     * @ORM\OneToMany(targetEntity="App\Entity\Operation", mappedBy="tag", orphanRemoval=true)
      */
     private $operations;
 
