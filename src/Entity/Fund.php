@@ -74,7 +74,7 @@ class Fund implements Identifiable
     /**
      * @var ArrayCollection
      *
-     * @ORM\OneToMany(targetEntity="App\Entity\Operation", mappedBy="fund")
+     * @ORM\OneToMany(targetEntity="App\Entity\Operation", mappedBy="fund", orphanRemoval=true)
      */
     private $operations;
 
