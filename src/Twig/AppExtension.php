@@ -65,12 +65,16 @@ class AppExtension extends AbstractExtension
     /**
      * Returns a human-readable representation of the date provided as a timestamp.
      *
-     * @param integer $timestamp
+     * @param integer|null $timestamp
      *
-     * @return string
+     * @return string|null
      */
-    public function formatDateForHumans(int $timestamp): string
+    public function formatDateForHumans(?int $timestamp): ?string
     {
+        if (!$timestamp) {
+            return null;
+        }
+
         $userTimezone    = new \DateTimeZone('Asia/Novosibirsk');       // TODO refactor to get from user settings
         $dateFormatFull  = 'F d, Y';                                    // TODO refactor to get from user settings
         $dateFormatShort = 'F d';                                       // TODO refactor to get from user settings
