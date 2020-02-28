@@ -4,8 +4,11 @@ namespace App\Controller;
 
 use App\Entity\Debt;
 use App\Form\DebtType;
+use App\Repository\DebtRepository;
 use App\Service\DebtMonitor;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -22,14 +25,23 @@ class DebtController extends AbstractController
     /** @var DebtMonitor */
     private $debtMonitor;
 
+    /** @var EntityManagerInterface */
+    private $em;
+
+    /** @var DebtRepository */
+    private $debtRepo;
+
     /**
      * DebtController constructor.
      *
-     * @param DebtMonitor $debtMonitor
+     * @param DebtMonitor            $debtMonitor
+     * @param EntityManagerInterface $em
      */
-    public function __construct(DebtMonitor $debtMonitor)
+    public function __construct(DebtMonitor $debtMonitor, EntityManagerInterface $em)
     {
         $this->debtMonitor = $debtMonitor;
+        $this->em          = $em;
+        $this->debtRepo    = $em->getRepository(Debt::class);
     }
 
     /**
@@ -39,9 +51,11 @@ class DebtController extends AbstractController
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
 
-        $user = $this->getUser();
+        $user  = $this->getUser();
+        $debts = $this->debtRepo->findByUser($user);
 
         return $this->render('debt/index.html.twig', [
+            'debts' => $debts,
         ]);
     }
 
@@ -62,7 +76,7 @@ class DebtController extends AbstractController
         $debt = new Debt();
         $debt->setUser($user);
 
-        $form    = $this->createForm(DebtType::class, $debt);
+        $form = $this->createForm(DebtType::class, $debt);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var Debt $debt */
@@ -77,6 +91,56 @@ class DebtController extends AbstractController
 
         return $this->render('debt/new.html.twig', [
             'debtForm' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * @Route("/edit/{id}", name="debt_edit", methods={"GET", "POST"})
+     *
+     * @param Debt    $debt
+     * @param Request $request
+     *
+     * @return Response
+     */
+    public function edit(Debt $debt, Request $request): Response
+    {
+        $this->denyAccessUnlessGranted('DEBT_EDIT', $debt);
+
+        $form = $this->createForm(DebtType::class, $debt);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            /** @var Debt $debt */
+            $debt = $form->getData();
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($debt);
+            $em->flush();
+
+            return $this->redirectToRoute('debt_index');
+        }
+
+        return $this->render('debt/edit.html.twig', [
+            'debtForm' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * @Route("/{id}", name="debt_delete", methods={"DELETE"})
+     *
+     * @param Debt $debt
+     *
+     * @return Response
+     */
+    public function delete(Debt $debt): Response
+    {
+        $this->denyAccessUnlessGranted('DEBT_DELETE', $debt);
+
+        $em = $this->getDoctrine()->getManager();
+        $em->remove($debt);
+        $em->flush();
+
+        return new JsonResponse([       // TODO fix it
+            'data' => 'Debt deleted successfully',
         ]);
     }
 }

@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit debt{% endblock %}
+
+{% block body %}
+    <h1>Edit debt:</h1>
+    {{ form_start(debtForm) }}
+        {{ form_widget(debtForm) }}
+        <button type="submit">Save changes</button>
+    {{ form_end(debtForm) }}
+{% endblock %}

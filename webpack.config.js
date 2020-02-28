@@ -29,6 +29,7 @@ Encore
     .addEntry('category', './assets/js/category.js')
     .addEntry('person', './assets/js/person.js')
     .addEntry('fund', './assets/js/fund.js')
+    .addEntry('debt', './assets/js/debt.js')
     .addEntry('tag', './assets/js/tag.js')
 
     // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
