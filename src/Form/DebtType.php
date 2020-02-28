@@ -65,6 +65,7 @@ class DebtType extends AbstractType
                 'scale'  => 2,
                 'mapped' => false,
             ])
+            ->add('dueDate')
         ;
 
         $builder->get('amount')

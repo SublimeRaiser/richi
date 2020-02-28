@@ -47,6 +47,13 @@ class Debt
     /**
      * @var \DateTimeInterface
      *
+     * @ORM\Column(type="date", nullable=true)
+     */
+    private $dueDate;
+
+    /**
+     * @var \DateTimeInterface
+     *
      * @ORM\Column(type="datetime")
      */
     private $createdAt;
@@ -134,6 +141,26 @@ class Debt
     public function setDescription(?string $description): self
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * @return \DateTimeInterface|null
+     */
+    public function getDueDate(): ?\DateTimeInterface
+    {
+        return $this->dueDate;
+    }
+
+    /**
+     * @param \DateTimeInterface|null $dueDate
+     *
+     * @return Debt
+     */
+    public function setDueDate(?\DateTimeInterface $dueDate): self
+    {
+        $this->dueDate = $dueDate;
 
         return $this;
     }
