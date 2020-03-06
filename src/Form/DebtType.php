@@ -59,11 +59,11 @@ class DebtType extends AbstractType
                 'placeholder' => '---',
                 'required'    => true,
             ])
-            ->add('description')
             ->add('amount', NumberType::class, [
                 'scale'  => 2,
                 'mapped' => false,
             ])
+            ->add('description')
             ->add('dueDate')
         ;
 
