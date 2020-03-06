@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\Debt;
+use App\Entity\Operation;
+use App\Enum\OperationTypeEnum;
 use App\Form\DebtType;
 use App\Repository\DebtRepository;
 use App\Service\DebtMonitor;
@@ -77,6 +79,7 @@ class DebtController extends AbstractController
         $debt->setUser($user);
 
         $form = $this->createForm(DebtType::class, $debt);
+        $form->get('date')->setData(new \DateTime());
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var Debt $debt */
@@ -84,6 +87,30 @@ class DebtController extends AbstractController
 
             $em = $this->getDoctrine()->getManager();
             $em->persist($debt);
+
+
+            $operation = new Operation();
+            $date   = $form->get('date')->getData();
+            $person = $form->get('person')->getData();
+            $target = $form->get('target')->getData();
+            $amount = $form->get('amount')->getData();
+            $operation->setUser($user);
+            $operation->setType(OperationTypeEnum::TYPE_DEBT);
+            $operation->setDate($date);
+            $operation->setPerson($person);
+            $operation->setTarget($target);
+            $operation->setAmount($amount);
+
+            // TODO add validation before persising
+
+            $em->persist($operation);
+
+
+
+
+
+
+
             $em->flush();
 
             return $this->redirectToRoute('debt_index');

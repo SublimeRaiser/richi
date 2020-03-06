@@ -2,13 +2,16 @@
 
 namespace App\Form;
 
+use App\Entity\Account;
 use App\Entity\Debt;
 use App\Entity\Person;
 use App\Form\DataTransformer\KopecksToRublesTransformer;
+use App\Repository\AccountRepository;
 use App\Repository\PersonRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -49,15 +52,26 @@ class DebtType extends AbstractType
         $user = $this->security->getUser();
 
         /** @var PersonRepository $personRepo */
-        $personRepo = $this->em->getRepository(Person::class);
+        $personRepo  = $this->em->getRepository(Person::class);
+        /** @var AccountRepository $accountRepo */
+        $accountRepo = $this->em->getRepository(Account::class);
 
         $builder
+            ->add('date', DateType::class, [
+                'mapped' => false,
+            ])
             ->add('person', EntityType::class, [
                 'class'       => Person::class,
                 'choices'     => $personRepo->findByUser($user),
                 'empty_data'  => null,
                 'placeholder' => '---',
                 'required'    => true,
+            ])
+            ->add('target', EntityType::class, [
+                'class'    => Account::class,
+                'choices'  => $accountRepo->findNotArchived($user),
+                'required' => true,
+                'mapped'   => false,
             ])
             ->add('amount', NumberType::class, [
                 'scale'  => 2,

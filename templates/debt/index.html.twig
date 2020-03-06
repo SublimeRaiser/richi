@@ -10,7 +10,6 @@
     <table>
         <thead>
         <th>Person</th>
-        <th>Amount</th>
         <th>Due date</th>
         <th>Description</th>
         <th>Actions</th>
@@ -25,7 +24,6 @@
 
             <tr>
                 <td>{{ debt.person.name }}</td>
-                <td style="text-align: right">{{ 0|currency }}</td>
                 <td>{{ debtDueDateForHuman }}</td>
                 <td>{{ debt.description }}</td>
                 <td>
