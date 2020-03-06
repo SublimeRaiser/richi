@@ -100,6 +100,13 @@ class Operation
     private $fund;
 
     /**
+     * @var Debt
+     *
+     * @ORM\ManyToOne(targetEntity="App\Entity\Debt", inversedBy="operations")
+     */
+    private $debt;
+
+    /**
      * @var \DateTimeInterface
      *
      * @ORM\Column(type="datetime")
@@ -368,6 +375,26 @@ class Operation
     public function setFund(?Fund $fund): self
     {
         $this->fund = $fund;
+
+        return $this;
+    }
+
+    /**
+     * @return Debt|null
+     */
+    public function getDebt(): ?Debt
+    {
+        return $this->debt;
+    }
+
+    /**
+     * @param Debt|null $debt
+     *
+     * @return Operation
+     */
+    public function setDebt(?Debt $debt): self
+    {
+        $this->debt = $debt;
 
         return $this;
     }

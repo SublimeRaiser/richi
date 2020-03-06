@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -52,6 +54,13 @@ class Debt
     private $dueDate;
 
     /**
+     * @var ArrayCollection
+     *
+     * @ORM\OneToMany(targetEntity="App\Entity\Operation", mappedBy="debt")
+     */
+    private $operations;
+
+    /**
      * @var \DateTimeInterface
      *
      * @ORM\Column(type="datetime")
@@ -72,6 +81,8 @@ class Debt
      */
     public function __construct()
     {
+        $this->operations = new ArrayCollection();
+
         $now              = new \DateTime();
         $this->createdAt  = $now;
         $this->updatedAt  = $now;
@@ -151,6 +162,47 @@ class Debt
     public function getDueDate(): ?\DateTimeInterface
     {
         return $this->dueDate;
+    }
+
+    /**
+     * @return Collection|Operation[]
+     */
+    public function getOperations(): Collection
+    {
+        return $this->operations;
+    }
+
+    /**
+     * @param Operation $operation
+     *
+     * @return Debt
+     */
+    public function addOperation(Operation $operation): self
+    {
+        if (!$this->operations->contains($operation)) {
+            $this->operations[] = $operation;
+            $operation->setDebt($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param Operation $operation
+     *
+     * @return Debt
+     */
+    public function removeOperation(Operation $operation): self
+    {
+        if ($this->operations->contains($operation)) {
+            $this->operations->removeElement($operation);
+            // set the owning side to null (unless already changed)
+            if ($operation->getDebt() === $this) {
+                $operation->setDebt(null);
+            }
+        }
+
+        return $this;
     }
 
     /**
