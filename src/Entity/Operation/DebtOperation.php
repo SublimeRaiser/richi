@@ -1,18 +1,15 @@
 <?php
 
-namespace App\Entity;
+namespace App\Entity\Operation;
 
+use App\Entity\Account;
 use App\Enum\OperationTypeEnum;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\OperationRepository")
- * @ORM\HasLifecycleCallbacks()
- */
-class Operation
+class DebtOperation extends BaseOperation
 {
     /**
      * @var integer
@@ -52,14 +49,7 @@ class Operation
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\Account")
      */
-    private $source;
-
-    /**
-     * @var Account|null
-     *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Account")
-     */
-    private $target;
+    private $account;
 
     /**
      * @var integer
@@ -155,7 +145,7 @@ class Operation
     /**
      * @param UserInterface|null $user
      *
-     * @return Operation
+     * @return BaseOperation
      */
     public function setUser(?UserInterface $user): self
     {
@@ -175,7 +165,7 @@ class Operation
     /**
      * @param \DateTimeInterface $date
      *
-     * @return Operation
+     * @return BaseOperation
      */
     public function setDate(\DateTimeInterface $date): self
     {
@@ -197,9 +187,9 @@ class Operation
     /**
      * @param integer $type
      *
-     * @see OperationTypeEnum
+     * @return BaseOperation
+     *@see OperationTypeEnum
      *
-     * @return Operation
      */
     public function setType(int $type): self
     {
@@ -215,39 +205,19 @@ class Operation
     /**
      * @return Account|null
      */
-    public function getSource(): ?Account
+    public function getAccount(): ?Account
     {
-        return $this->source;
+        return $this->account;
     }
 
     /**
      * @param Account|null $source
      *
-     * @return Operation
+     * @return BaseOperation
      */
-    public function setSource(?Account $source): self
+    public function setAccount(?Account $source): self
     {
-        $this->source = $source;
-
-        return $this;
-    }
-
-    /**
-     * @return Account|null
-     */
-    public function getTarget(): ?Account
-    {
-        return $this->target;
-    }
-
-    /**
-     * @param Account|null $target
-     *
-     * @return Operation
-     */
-    public function setTarget(?Account $target): self
-    {
-        $this->target = $target;
+        $this->account = $source;
 
         return $this;
     }
@@ -263,7 +233,7 @@ class Operation
     /**
      * @param integer $amount
      *
-     * @return Operation
+     * @return BaseOperation
      */
     public function setAmount(int $amount): self
     {
@@ -283,7 +253,7 @@ class Operation
     /**
      * @param Category|null $category
      *
-     * @return Operation
+     * @return BaseOperation
      */
     public function setCategory(?Category $category): self
     {
@@ -303,7 +273,7 @@ class Operation
     /**
      * @param string|null $description
      *
-     * @return Operation
+     * @return BaseOperation
      */
     public function setDescription(?string $description): self
     {
@@ -323,7 +293,7 @@ class Operation
     /**
      * @param Person|null $person
      *
-     * @return Operation
+     * @return BaseOperation
      */
     public function setPerson(?Person $person): self
     {
@@ -343,7 +313,7 @@ class Operation
     /**
      * @param Tag|null $tag
      *
-     * @return Operation
+     * @return BaseOperation
      */
     public function setTag(?Tag $tag): self
     {
@@ -363,7 +333,7 @@ class Operation
     /**
      * @param Fund|null $fund
      *
-     * @return Operation
+     * @return BaseOperation
      */
     public function setFund(?Fund $fund): self
     {
@@ -410,7 +380,7 @@ class Operation
         $incomeOperation   = $this->getType() === OperationTypeEnum::TYPE_INCOME;
         $expenseOperation  = $this->getType() === OperationTypeEnum::TYPE_EXPENSE;
         $transferOperation = $this->getType() === OperationTypeEnum::TYPE_TRANSFER;
-        if (!$this->source && ($expenseOperation || $transferOperation)) {
+        if (!$this->account && ($expenseOperation || $transferOperation)) {
             $context
                 ->buildViolation('Source account should not be blank')
                 ->atPath('source')
