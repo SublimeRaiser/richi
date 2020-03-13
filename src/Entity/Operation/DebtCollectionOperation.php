@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity()
  */
-class DebtOperation extends BaseOperation
+class DebtCollectionOperation extends BaseOperation
 {
     /**
      * @var Account|null
@@ -36,7 +36,7 @@ class DebtOperation extends BaseOperation
     /**
      * @param Account|null $account
      *
-     * @return DebtOperation
+     * @return DebtCollectionOperation
      */
     public function setTargetAccount(?Account $account): self
     {
@@ -56,7 +56,7 @@ class DebtOperation extends BaseOperation
     /**
      * @param Person|null $person
      *
-     * @return DebtOperation
+     * @return DebtCollectionOperation
      */
     public function setPerson(?Person $person): self
     {

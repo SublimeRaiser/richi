@@ -9,14 +9,14 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity()
  */
-class DebtOperation extends BaseOperation
+class RepaymentOperation extends BaseOperation
 {
     /**
      * @var Account|null
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\Account")
      */
-    private $targetAccount;
+    private $sourceAccount;
 
     /**
      * @var Person|null
@@ -28,19 +28,19 @@ class DebtOperation extends BaseOperation
     /**
      * @return Account|null
      */
-    public function getTargetAccount(): ?Account
+    public function getSourceAccount(): ?Account
     {
-        return $this->targetAccount;
+        return $this->sourceAccount;
     }
 
     /**
      * @param Account|null $account
      *
-     * @return DebtOperation
+     * @return RepaymentOperation
      */
-    public function setTargetAccount(?Account $account): self
+    public function setSourceAccount(?Account $account): self
     {
-        $this->targetAccount = $account;
+        $this->sourceAccount = $account;
 
         return $this;
     }
@@ -56,7 +56,7 @@ class DebtOperation extends BaseOperation
     /**
      * @param Person|null $person
      *
-     * @return DebtOperation
+     * @return RepaymentOperation
      */
     public function setPerson(?Person $person): self
     {

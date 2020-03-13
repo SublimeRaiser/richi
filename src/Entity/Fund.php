@@ -72,13 +72,6 @@ class Fund implements Identifiable
     private $person;
 
     /**
-     * @var ArrayCollection
-     *
-     * @ORM\OneToMany(targetEntity="App\Entity\Operation", mappedBy="fund")
-     */
-    private $operations;
-
-    /**
      * @var integer
      *
      * @ORM\Column(type="integer")
@@ -106,8 +99,6 @@ class Fund implements Identifiable
      */
     public function __construct()
     {
-        $this->operations = new ArrayCollection();
-
         $now              = new \DateTime();
         $this->createdAt  = $now;
         $this->updatedAt  = $now;
@@ -225,47 +216,6 @@ class Fund implements Identifiable
     public function setPerson(?Person $person): self
     {
         $this->person = $person;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection|Operation[]
-     */
-    public function getOperations(): Collection
-    {
-        return $this->operations;
-    }
-
-    /**
-     * @param Operation $operation
-     *
-     * @return Fund
-     */
-    public function addOperation(Operation $operation): self
-    {
-        if (!$this->operations->contains($operation)) {
-            $this->operations[] = $operation;
-            $operation->setFund($this);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param Operation $operation
-     *
-     * @return Fund
-     */
-    public function removeOperation(Operation $operation): self
-    {
-        if ($this->operations->contains($operation)) {
-            $this->operations->removeElement($operation);
-            // set the owning side to null (unless already changed)
-            if ($operation->getFund() === $this) {
-                $operation->setFund(null);
-            }
-        }
 
         return $this;
     }

@@ -51,13 +51,6 @@ class User implements UserInterface
     /**
      * @var ArrayCollection
      *
-     * @ORM\OneToMany(targetEntity="App\Entity\Operation", mappedBy="user", orphanRemoval=true)
-     */
-    private $operations;
-
-    /**
-     * @var ArrayCollection
-     *
      * @ORM\OneToMany(targetEntity="App\Entity\Account", mappedBy="user", orphanRemoval=true)
      */
     private $accounts;
@@ -68,13 +61,6 @@ class User implements UserInterface
      * @ORM\OneToMany(targetEntity="App\Entity\Person", mappedBy="user", orphanRemoval=true)
      */
     private $persons;
-
-    /**
-     * @var ArrayCollection
-     *
-     * @ORM\OneToMany(targetEntity="App\Entity\Category", mappedBy="user", orphanRemoval=true)
-     */
-    private $categories;
 
     /**
      * @var ArrayCollection
@@ -109,10 +95,8 @@ class User implements UserInterface
      */
     public function __construct()
     {
-        $this->operations = new ArrayCollection();
         $this->accounts   = new ArrayCollection();
         $this->persons    = new ArrayCollection();
-        $this->categories = new ArrayCollection();
         $this->tags       = new ArrayCollection();
         $this->funds      = new ArrayCollection();
 
@@ -231,47 +215,6 @@ class User implements UserInterface
     }
 
     /**
-     * @return Collection|Operation[]
-     */
-    public function getOperations(): Collection
-    {
-        return $this->operations;
-    }
-
-    /**
-     * @param Operation $operation
-     *
-     * @return User
-     */
-    public function addOperation(Operation $operation): self
-    {
-        if (!$this->operations->contains($operation)) {
-            $this->operations[] = $operation;
-            $operation->setUser($this);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param Operation $operation
-     *
-     * @return User
-     */
-    public function removeOperation(Operation $operation): self
-    {
-        if ($this->operations->contains($operation)) {
-            $this->operations->removeElement($operation);
-            // set the owning side to null (unless already changed)
-            if ($operation->getUser() === $this) {
-                $operation->setUser(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
      * @return Collection|Account[]
      */
     public function getAccounts(): Collection
@@ -347,47 +290,6 @@ class User implements UserInterface
             // set the owning side to null (unless already changed)
             if ($person->getUser() === $this) {
                 $person->setUser(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection|Category[]
-     */
-    public function getCategories(): Collection
-    {
-        return $this->categories;
-    }
-
-    /**
-     * @param Category $category
-     *
-     * @return User
-     */
-    public function addCategory(Category $category): self
-    {
-        if (!$this->categories->contains($category)) {
-            $this->categories[] = $category;
-            $category->setUser($this);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param Category $category
-     *
-     * @return User
-     */
-    public function removeCategory(Category $category): self
-    {
-        if ($this->categories->contains($category)) {
-            $this->categories->removeElement($category);
-            // set the owning side to null (unless already changed)
-            if ($category->getUser() === $this) {
-                $category->setUser(null);
             }
         }
 

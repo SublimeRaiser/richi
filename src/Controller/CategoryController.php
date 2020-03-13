@@ -2,7 +2,8 @@
 
 namespace App\Controller;
 
-use App\Entity\Category;
+use App\Entity\BaseCategory;
+use App\Entity\Category\IncomeCategory;
 use App\Enum\OperationTypeEnum;
 use App\Form\CategoryType;
 use App\Repository\CategoryRepository;
@@ -33,7 +34,7 @@ class CategoryController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_USER');
 
         /** @var CategoryRepository $categoryRepo */
-        $categoryRepo = $this->getDoctrine()->getRepository(Category::class);
+        $categoryRepo = $this->getDoctrine()->getRepository(BaseCategory::class);
         $user         = $this->getUser();
         $categories   = $categoryRepo->findByUser($user);
 
@@ -71,7 +72,7 @@ class CategoryController extends AbstractController
         /** @var UserInterface $user */
         $user = $this->getUser();
 
-        $category = new Category();
+        $category = new BaseCategory();
         $category->setOperationType($operationType);
         $category->setUser($user);
 
@@ -82,7 +83,7 @@ class CategoryController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            /** @var Category $category */
+            /** @var BaseCategory $category */
             $category = $form->getData();
 
             $em = $this->getDoctrine()->getManager();
@@ -101,12 +102,12 @@ class CategoryController extends AbstractController
     /**
      * @Route("/edit/{id}", name="category_edit", methods={"GET", "POST"})
      *
-     * @param Category $category
+     * @param IncomeCategory $category
      * @param Request  $request
      *
      * @return Response
      */
-    public function edit(Category $category, Request $request): Response
+    public function edit(IncomeCategory $category, Request $request): Response
     {
         $this->denyAccessUnlessGranted('CATEGORY_EDIT', $category);
 
@@ -136,11 +137,11 @@ class CategoryController extends AbstractController
     /**
      * @Route("/{id}", name="category_delete", methods={"DELETE"})
      *
-     * @param Category $category
+     * @param IncomeCategory $category
      *
      * @return Response
      */
-    public function delete(Category $category): Response
+    public function delete(IncomeCategory $category): Response
     {
         $this->denyAccessUnlessGranted('CATEGORY_DELETE', $category);
 

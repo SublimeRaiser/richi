@@ -2,7 +2,7 @@
 
 namespace App\Security\Voter;
 
-use App\Entity\Operation;
+use App\Entity\BaseOperation;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -12,7 +12,7 @@ class OperationVoter extends Voter
     protected function supports($attribute, $subject)
     {
         return in_array($attribute, ['OPERATION_EDIT', 'OPERATION_COPY', 'OPERATION_DELETE'])
-            && $subject instanceof Operation;
+            && $subject instanceof BaseOperation;
     }
 
     protected function voteOnAttribute($attribute, $subject, TokenInterface $token)

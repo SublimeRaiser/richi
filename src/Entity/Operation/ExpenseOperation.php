@@ -3,301 +3,76 @@
 namespace App\Entity\Operation;
 
 use App\Entity\Account;
-use App\Enum\OperationTypeEnum;
+use App\Entity\Category\ExpenseCategory;
+use App\Entity\Fund;
+use App\Entity\Tag;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
+/**
+ * @ORM\Entity()
+ */
 class ExpenseOperation extends BaseOperation
 {
-    /**
-     * @var integer
-     *
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
-    private $id;
-
-    /**
-     * @var UserInterface
-     *
-     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="operations")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $user;
-
-    /**
-     * @var \DateTimeInterface
-     *
-     * @ORM\Column(name="`date`", type="date")
-     */
-    private $date;
-
-    /**
-     * @var integer
-     *
-     * @ORM\Column(name="`type`", type="smallint")
-     *
-     * @see OperationTypeEnum
-     */
-    private $type;
-
     /**
      * @var Account|null
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\Account")
      */
-    private $account;
+    private $sourceAccount;
 
     /**
-     * @var integer
-     *
-     * @ORM\Column(type="integer")
-     */
-    private $amount;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Category")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Category\ExpenseCategory")
      */
     private $category;
 
     /**
-     * @var string|null
-     *
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
-    private $description;
-
-    /**
-     * @var Person|null
-     *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Person")
-     */
-    private $person;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Tag", inversedBy="operations")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Tag")
      */
     private $tag;
 
     /**
      * @var Fund
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Fund", inversedBy="operations")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Fund")
      */
     private $fund;
 
     /**
-     * @var \DateTimeInterface
-     *
-     * @ORM\Column(type="datetime")
-     */
-    private $createdAt;
-
-    /**
-     * @var \DateTimeInterface
-     *
-     * @ORM\Column(type="datetime")
-     */
-    private $updatedAt;
-
-    /**
-     * Operation constructor.
-     */
-    public function __construct()
-    {
-        $now             = new \DateTime();
-        $this->date      = $now;
-        $this->createdAt = $now;
-        $this->updatedAt = $now;
-    }
-
-    /**
-     * @return void
-     */
-    public function __clone()
-    {
-        if ($this->id) {
-            $now             = new \DateTime();
-            $this->createdAt = $now;
-            $this->updatedAt = $now;
-        }
-    }
-
-    /**
-     * @return integer|null
-     */
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
-    /**
-     * @return UserInterface|null
-     */
-    public function getUser(): ?UserInterface
-    {
-        return $this->user;
-    }
-
-    /**
-     * @param UserInterface|null $user
-     *
-     * @return BaseOperation
-     */
-    public function setUser(?UserInterface $user): self
-    {
-        $this->user = $user;
-
-        return $this;
-    }
-
-    /**
-     * @return \DateTimeInterface|null
-     */
-    public function getDate(): ?\DateTimeInterface
-    {
-        return $this->date;
-    }
-
-    /**
-     * @param \DateTimeInterface $date
-     *
-     * @return BaseOperation
-     */
-    public function setDate(\DateTimeInterface $date): self
-    {
-        $this->date = $date;
-
-        return $this;
-    }
-
-    /**
-     * @return integer|null
-     *
-     * @see OperationTypeEnum
-     */
-    public function getType(): ?int
-    {
-        return $this->type;
-    }
-
-    /**
-     * @param integer $type
-     *
-     * @return BaseOperation
-     *@see OperationTypeEnum
-     *
-     */
-    public function setType(int $type): self
-    {
-        if (!in_array($type, OperationTypeEnum::getAvailableTypes())) {
-            throw new \InvalidArgumentException('Unsupported operation type.');
-        }
-
-        $this->type = $type;
-
-        return $this;
-    }
-
-    /**
      * @return Account|null
      */
-    public function getAccount(): ?Account
+    public function getSourceAccount(): ?Account
     {
-        return $this->account;
+        return $this->sourceAccount;
     }
 
     /**
-     * @param Account|null $source
+     * @param Account|null $account
      *
-     * @return BaseOperation
+     * @return ExpenseOperation
      */
-    public function setAccount(?Account $source): self
+    public function setSourceAccount(?Account $account): self
     {
-        $this->account = $source;
+        $this->sourceAccount = $account;
 
         return $this;
     }
 
-    /**
-     * @return integer|null
+     /**
+     * @return ExpenseCategory|null
      */
-    public function getAmount(): ?int
-    {
-        return $this->amount;
-    }
-
-    /**
-     * @param integer $amount
-     *
-     * @return BaseOperation
-     */
-    public function setAmount(int $amount): self
-    {
-        $this->amount = $amount;
-
-        return $this;
-    }
-
-    /**
-     * @return Category|null
-     */
-    public function getCategory(): ?Category
+    public function getCategory(): ?ExpenseCategory
     {
         return $this->category;
     }
 
     /**
-     * @param Category|null $category
+     * @param ExpenseCategory|null $category
      *
-     * @return BaseOperation
+     * @return ExpenseOperation
      */
-    public function setCategory(?Category $category): self
+    public function setCategory(?ExpenseCategory $category): self
     {
         $this->category = $category;
-
-        return $this;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
-    /**
-     * @param string|null $description
-     *
-     * @return BaseOperation
-     */
-    public function setDescription(?string $description): self
-    {
-        $this->description = $description;
-
-        return $this;
-    }
-
-    /**
-     * @return Person|null
-     */
-    public function getPerson(): ?Person
-    {
-        return $this->person;
-    }
-
-    /**
-     * @param Person|null $person
-     *
-     * @return BaseOperation
-     */
-    public function setPerson(?Person $person): self
-    {
-        $this->person = $person;
 
         return $this;
     }
@@ -313,7 +88,7 @@ class ExpenseOperation extends BaseOperation
     /**
      * @param Tag|null $tag
      *
-     * @return BaseOperation
+     * @return ExpenseOperation
      */
     public function setTag(?Tag $tag): self
     {
@@ -333,72 +108,12 @@ class ExpenseOperation extends BaseOperation
     /**
      * @param Fund|null $fund
      *
-     * @return BaseOperation
+     * @return ExpenseOperation
      */
     public function setFund(?Fund $fund): self
     {
         $this->fund = $fund;
 
         return $this;
-    }
-
-    /**
-     * @return \DateTimeInterface|null
-     */
-    public function getCreatedAt(): ?\DateTimeInterface
-    {
-        return $this->createdAt;
-    }
-
-    /**
-     * @return \DateTimeInterface|null
-     */
-    public function getUpdatedAt(): ?\DateTimeInterface
-    {
-        return $this->updatedAt;
-    }
-
-    /**
-     * @ORM\PreUpdate()
-     *
-     * @return void
-     */
-    public function setUpdatedAtValue(): void
-    {
-        $this->updatedAt = new \DateTime();
-    }
-
-    /**
-     * @Assert\Callback
-     *
-     * @param ExecutionContextInterface $context
-     *
-     * @return void
-     */
-    public function validateFields(ExecutionContextInterface $context): void
-    {
-        $incomeOperation   = $this->getType() === OperationTypeEnum::TYPE_INCOME;
-        $expenseOperation  = $this->getType() === OperationTypeEnum::TYPE_EXPENSE;
-        $transferOperation = $this->getType() === OperationTypeEnum::TYPE_TRANSFER;
-        if (!$this->account && ($expenseOperation || $transferOperation)) {
-            $context
-                ->buildViolation('Source account should not be blank')
-                ->atPath('source')
-                ->addViolation();
-        }
-
-        if (!$this->target && ($incomeOperation || $transferOperation)) {
-            $context
-                ->buildViolation('Target account should not be blank')
-                ->atPath('target')
-                ->addViolation();
-        }
-
-        if ($this->amount <= 0) {
-            $context
-                ->buildViolation('Amount should be greater than zero')
-                ->atPath('amount')
-                ->addViolation();
-        }
     }
 }

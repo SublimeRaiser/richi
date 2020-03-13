@@ -5,7 +5,7 @@ namespace App\Service;
 
 use App\Entity\Account;
 use App\Entity\Fund;
-use App\Entity\Operation;
+use App\Entity\BaseOperation;
 use App\Enum\OperationTypeEnum;
 use App\Repository\AccountRepository;
 use App\Repository\FundRepository;
@@ -41,7 +41,7 @@ class BalanceMonitor
     public function __construct(EntityManagerInterface $em)
     {
         $this->em            = $em;
-        $this->operationRepo = $em->getRepository(Operation::class);
+        $this->operationRepo = $em->getRepository(BaseOperation::class);
         $this->accountRepo   = $em->getRepository(Account::class);
         $this->fundRepo      = $em->getRepository(Fund::class);
     }

@@ -2,12 +2,15 @@
 
 namespace App\Entity\Operation;
 
-use App\Entity\Account;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
+/**
+ * @ORM\MappedSuperclass()
+ * @ORM\HasLifecycleCallbacks()
+ */
 abstract class BaseOperation
 {
     /**
@@ -22,7 +25,7 @@ abstract class BaseOperation
     /**
      * @var UserInterface
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="operations")
+     * @ORM\ManyToOne(targetEntity="App\Entity\User")
      * @ORM\JoinColumn(nullable=false)
      */
     protected $user;
@@ -33,13 +36,6 @@ abstract class BaseOperation
      * @ORM\Column(name="`date`", type="date")
      */
     protected $date;
-
-    /**
-     * @var Account|null
-     *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Account")
-     */
-    protected $account;
 
     /**
      * @var integer
@@ -70,7 +66,7 @@ abstract class BaseOperation
     protected $updatedAt;
 
     /**
-     * Operation constructor.
+     * @throws \Exception
      */
     public function __construct()
     {
@@ -81,7 +77,7 @@ abstract class BaseOperation
     }
 
     /**
-     * @return void
+     * @throws \Exception
      */
     public function __clone()
     {
@@ -136,26 +132,6 @@ abstract class BaseOperation
     public function setDate(\DateTimeInterface $date): self
     {
         $this->date = $date;
-
-        return $this;
-    }
-
-    /**
-     * @return Account|null
-     */
-    public function getAccount(): ?Account
-    {
-        return $this->account;
-    }
-
-    /**
-     * @param Account|null $source
-     *
-     * @return BaseOperation
-     */
-    public function setAccount(?Account $source): self
-    {
-        $this->account = $source;
 
         return $this;
     }

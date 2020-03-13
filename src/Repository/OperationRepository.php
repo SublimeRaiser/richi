@@ -5,7 +5,7 @@ namespace App\Repository;
 use App\Entity\Account;
 use App\Entity\Fund;
 use App\Entity\Identifiable;
-use App\Entity\Operation;
+use App\Entity\BaseOperation;
 use App\Entity\Person;
 use App\Enum\OperationTypeEnum;
 use App\ValueObject\AccountCash;
@@ -23,7 +23,7 @@ class OperationRepository extends BaseRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Operation::class);
+        parent::__construct($registry, BaseOperation::class);
     }
 
     /**
@@ -32,7 +32,7 @@ class OperationRepository extends BaseRepository
      * @param UserInterface $user
      * @param string|null   $sortOrder
      *
-     * @return Operation[]
+     * @return BaseOperation[]
      */
     public function findByUser(UserInterface $user, string $sortOrder = 'ASC'): array
     {

@@ -2,7 +2,7 @@
 
 namespace App\Form;
 
-use App\Entity\Category;
+use App\Entity\BaseCategory;
 use App\Repository\CategoryRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -42,11 +42,11 @@ class CategoryType extends AbstractType
         $operationType = $options['operation_type'];
 
         /** @var CategoryRepository $categoryRepo */
-        $categoryRepo = $this->em->getRepository(Category::class);
+        $categoryRepo = $this->em->getRepository(BaseCategory::class);
 
         $builder
             ->add('parent', EntityType::class, [
-                'class'        => Category::class,
+                'class'        => BaseCategory::class,
                 'choices'      => $categoryRepo->findAbleToBeParent($user, $operationType),
                 'empty_data'   => null,
                 'placeholder'  => '---',
@@ -63,7 +63,7 @@ class CategoryType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => Category::class,
+            'data_class' => BaseCategory::class,
         ]);
 
         $resolver->setRequired('operation_type');

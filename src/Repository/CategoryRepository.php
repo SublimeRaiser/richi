@@ -2,7 +2,7 @@
 
 namespace App\Repository;
 
-use App\Entity\Category;
+use App\Entity\BaseCategory;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -14,7 +14,7 @@ class CategoryRepository extends BaseRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Category::class);
+        parent::__construct($registry, BaseCategory::class);
     }
 
     /**
@@ -22,7 +22,7 @@ class CategoryRepository extends BaseRepository
      *
      * @param UserInterface $user
      *
-     * @return Category[]
+     * @return BaseCategory[]
      */
     public function findByUser(UserInterface $user): array
     {
@@ -45,7 +45,7 @@ class CategoryRepository extends BaseRepository
      * @param UserInterface $user
      * @param integer       $operationType
      *
-     * @return Category[]
+     * @return BaseCategory[]
      * 
      * @see OperationTypeEnum
      */
@@ -68,7 +68,7 @@ class CategoryRepository extends BaseRepository
      * @param UserInterface $user
      * @param integer       $operationType
      *
-     * @return Category[]
+     * @return BaseCategory[]
      *
      * @see OperationTypeEnum
      */

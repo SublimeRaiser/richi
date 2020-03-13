@@ -3,7 +3,7 @@
 
 namespace App\Service;
 
-use App\Entity\Operation;
+use App\Entity\BaseOperation;
 use App\Repository\OperationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -28,7 +28,7 @@ class OperationList
     public function __construct(EntityManagerInterface $em)
     {
         $this->em            = $em;
-        $this->operationRepo = $em->getRepository(Operation::class);
+        $this->operationRepo = $em->getRepository(BaseOperation::class);
     }
 
     /**
@@ -36,7 +36,7 @@ class OperationList
      *
      * @param UserInterface $user
      *
-     * @return Operation[]
+     * @return BaseOperation[]
      */
     public function getGroupedByDays(UserInterface $user): array
     {

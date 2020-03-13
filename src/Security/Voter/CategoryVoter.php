@@ -2,7 +2,7 @@
 
 namespace App\Security\Voter;
 
-use App\Entity\Category;
+use App\Entity\BaseCategory;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -12,7 +12,7 @@ class CategoryVoter extends Voter
     protected function supports($attribute, $subject)
     {
         return in_array($attribute, ['CATEGORY_EDIT', 'CATEGORY_DELETE'])
-            && $subject instanceof Category;
+            && $subject instanceof BaseCategory;
     }
 
     protected function voteOnAttribute($attribute, $subject, TokenInterface $token)

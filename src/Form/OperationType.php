@@ -3,9 +3,9 @@
 namespace App\Form;
 
 use App\Entity\Account;
-use App\Entity\Category;
+use App\Entity\BaseCategory;
 use App\Entity\Fund;
-use App\Entity\Operation;
+use App\Entity\BaseOperation;
 use App\Entity\Person;
 use App\Entity\Tag;
 use App\Form\DataTransformer\KopecksToRublesTransformer;
@@ -63,7 +63,7 @@ class OperationType extends AbstractType
         /** @var AccountRepository $accountRepo */
         $accountRepo  = $this->em->getRepository(Account::class);
         /** @var CategoryRepository $categoryRepo */
-        $categoryRepo = $this->em->getRepository(Category::class);
+        $categoryRepo = $this->em->getRepository(BaseCategory::class);
         /** @var PersonRepository $personRepo */
         $personRepo   = $this->em->getRepository(Person::class);
         /** @var TagRepository $tagRepo */
@@ -85,7 +85,7 @@ class OperationType extends AbstractType
                 'scale' => 2,
             ])
             ->add('category', EntityType::class, [
-                'class'        => Category::class,
+                'class'        => BaseCategory::class,
                 'choices'      => $categoryRepo->findByOperationType($user, $operationType),
                 'empty_data'   => null,
                 'placeholder'  => '---',
@@ -125,7 +125,7 @@ class OperationType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => Operation::class,
+            'data_class' => BaseOperation::class,
         ]);
 
         $resolver->setRequired('operation_type');
