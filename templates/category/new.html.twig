@@ -5,7 +5,9 @@
 {% block body %}
     <h1>Create new {{ operationName }} category:</h1>
     {{ form_start(categoryForm) }}
-        {{ form_widget(categoryForm) }}
+        {{ form_row(categoryForm.parent) }}
+        {{ form_row(categoryForm.name) }}
+        {{ form_row(categoryForm.icon) }}
         <button type="submit">Save new category</button>
     {{ form_end(categoryForm) }}
 {% endblock %}

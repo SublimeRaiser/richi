@@ -64,7 +64,7 @@ class CategoryController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_USER');
 
         if (!OperationTypeEnum::isTypeExists($operationName)) {
-            throw new BadRequestHttpException('Unsupported operation type.');
+            throw new BadRequestHttpException('Unsupported operation name provided.');
         }
 
         /** @var UserInterface $user */
@@ -75,8 +75,8 @@ class CategoryController extends AbstractController
         $category = new $categoryClassName();
         $category->setUser($user);
 
-        /** @var Form $form */
         $categoryTypeClassName = 'App\\Form\\Category\\'.ucfirst($operationName).'CategoryType';
+        /** @var Form $form */
         $form = $this->createForm($categoryTypeClassName, $category);
         $form->handleRequest($request);
 
@@ -98,14 +98,15 @@ class CategoryController extends AbstractController
     }
 
     /**
-     * @Route("/edit/{id}", name="category_edit", methods={"GET", "POST"})
+     * @Route("/edit/{operationName}/{id}", name="category_edit", methods={"GET", "POST"})
      *
-     * @param IncomeCategory $category
+     * @param string   operationName
+     * @param integer  $id
      * @param Request  $request
      *
      * @return Response
      */
-    public function edit(IncomeCategory $category, Request $request): Response
+    public function edit(string $operationName, int $id, Request $request): Response
     {
         $this->denyAccessUnlessGranted('CATEGORY_EDIT', $category);
 
