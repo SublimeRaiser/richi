@@ -2,11 +2,14 @@
 
 namespace App\Controller;
 
-use App\Entity\BaseCategory;
+use App\Entity\Category\BaseCategory;
+use App\Entity\Category\ExpenseCategory;
 use App\Entity\Category\IncomeCategory;
 use App\Enum\OperationTypeEnum;
-use App\Form\CategoryType;
-use App\Repository\CategoryRepository;
+use App\Form\Category\IncomeCategoryType;
+use App\Form\Category\ExpenseCategoryType;
+use App\Repository\Category\ExpenseCategoryRepository;
+use App\Repository\Category\IncomeCategoryRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -33,17 +36,14 @@ class CategoryController extends AbstractController
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
 
-        /** @var CategoryRepository $categoryRepo */
-        $categoryRepo = $this->getDoctrine()->getRepository(BaseCategory::class);
-        $user         = $this->getUser();
-        $categories   = $categoryRepo->findByUser($user);
+        $user = $this->getUser();
 
-        $incomeCategories = array_filter($categories, function ($category) {
-            return $category->getOperationType() === OperationTypeEnum::TYPE_INCOME;
-        });
-        $expenseCategories = array_filter($categories, function ($category) {
-            return $category->getOperationType() === OperationTypeEnum::TYPE_EXPENSE;
-        });
+        /** @var IncomeCategoryRepository $incomeCategoryRepo */
+        $incomeCategoryRepo  = $this->getDoctrine()->getRepository(IncomeCategory::class);
+        $incomeCategories    = $incomeCategoryRepo->findByUser($user);
+        /** @var ExpenseCategoryRepository $expenseCategoryRepo */
+        $expenseCategoryRepo = $this->getDoctrine()->getRepository(ExpenseCategory::class);
+        $expenseCategories   = $expenseCategoryRepo->findByUser($user);
 
         return $this->render('category/index.html.twig', [
             'incomeCategories'  => $incomeCategories,
@@ -63,23 +63,21 @@ class CategoryController extends AbstractController
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
 
-        try {
-            $operationType = OperationTypeEnum::getTypeByName($operationName);
-        } catch (\Exception $e) {
-            throw new BadRequestHttpException($e->getMessage());
+        if (!OperationTypeEnum::isTypeExists($operationName)) {
+            throw new BadRequestHttpException('Unsupported operation type.');
         }
 
         /** @var UserInterface $user */
         $user = $this->getUser();
 
-        $category = new BaseCategory();
-        $category->setOperationType($operationType);
+        $categoryClassName = 'App\\Entity\\Category\\'.ucfirst($operationName).'Category';
+        /** @var BaseCategory $category */
+        $category = new $categoryClassName();
         $category->setUser($user);
 
         /** @var Form $form */
-        $form = $this->createForm(CategoryType::class, $category, [
-            'operation_type' => $operationType,
-        ]);
+        $categoryTypeClassName = 'App\\Form\\Category\\'.ucfirst($operationName).'CategoryType';
+        $form = $this->createForm($categoryTypeClassName, $category);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

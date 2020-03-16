@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Form;
+namespace App\Form\Category;
 
-use App\Entity\BaseCategory;
-use App\Repository\CategoryRepository;
+use App\Entity\Category\IncomeCategory;
+use App\Repository\Category\IncomeCategoryRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -12,7 +12,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class CategoryType extends AbstractType
+class IncomeCategoryType extends AbstractType
 {
     /** @var Security */
     private $security;
@@ -21,7 +21,7 @@ class CategoryType extends AbstractType
     private $em;
 
     /**
-     * CategoryType constructor.
+     * IncomeCategoryType constructor.
      *
      * @param Security               $security
      * @param EntityManagerInterface $em
@@ -39,15 +39,14 @@ class CategoryType extends AbstractType
     {
         /** @var UserInterface $user */
         $user          = $this->security->getUser();
-        $operationType = $options['operation_type'];
 
-        /** @var CategoryRepository $categoryRepo */
-        $categoryRepo = $this->em->getRepository(BaseCategory::class);
+        /** @var IncomeCategoryRepository $categoryRepo */
+        $categoryRepo = $this->em->getRepository(IncomeCategory::class);
 
         $builder
             ->add('parent', EntityType::class, [
-                'class'        => BaseCategory::class,
-                'choices'      => $categoryRepo->findAbleToBeParent($user, $operationType),
+                'class'        => IncomeCategory::class,
+                'choices'      => $categoryRepo->findAbleToBeParent($user),
                 'empty_data'   => null,
                 'placeholder'  => '---',
                 'required'     => false,
@@ -63,10 +62,7 @@ class CategoryType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => BaseCategory::class,
+            'data_class' => IncomeCategory::class,
         ]);
-
-        $resolver->setRequired('operation_type');
-        $resolver->setAllowedTypes('operation_type', 'int');
     }
 }

@@ -1,22 +1,13 @@
 <?php
 
-namespace App\Repository;
+namespace App\Repository\Category;
 
-use App\Entity\BaseCategory;
-use Doctrine\Common\Persistence\ManagerRegistry;
+use App\Entity\Category\BaseCategory;
+use App\Repository\BaseRepository;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-/**
- * Class CategoryRepository
- * @package App\Repository
- */
-class CategoryRepository extends BaseRepository
+abstract class BaseCategoryRepository extends BaseRepository
 {
-    public function __construct(ManagerRegistry $registry)
-    {
-        parent::__construct($registry, BaseCategory::class);
-    }
-
     /**
      * Returns a category list for the user.
      *
@@ -39,24 +30,19 @@ class CategoryRepository extends BaseRepository
     }
 
     /**
-     * Returns a category list of the given operation type that are able to be a parent category for other categories.
-     * Categories are related to the specified user.
+     * Returns a list of categories that are able to be a parent category for other categories. Categories are related
+     * to the specified user.
      *
      * @param UserInterface $user
-     * @param integer       $operationType
      *
      * @return BaseCategory[]
-     * 
-     * @see OperationTypeEnum
      */
-    public function findAbleToBeParent(UserInterface $user, int $operationType): array
+    public function findAbleToBeParent(UserInterface $user): array
     {
         return $this->createQueryBuilder('c')
             ->andWhere('c.user = :user')
             ->andWhere('c.parent IS NULL')
-            ->andWhere('c.operationType = :operationType')
             ->setParameter('user', $user)
-            ->setParameter('operationType', $operationType)
             ->orderBy('c.name', 'ASC')
             ->getQuery()
             ->getResult();

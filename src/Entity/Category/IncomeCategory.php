@@ -6,7 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="App\Repository\Category\IncomeCategoryRepository")
  * @ORM\HasLifecycleCallbacks()
  * @ORM\Table(
  *     name="income_category",

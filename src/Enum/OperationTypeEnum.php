@@ -67,4 +67,16 @@ final class OperationTypeEnum
 
         return $type;
     }
+
+    /**
+     * Checks whether an operation type with the given name exists.
+     *
+     * @param string $name
+     *
+     * @return boolean
+     */
+    public static function isTypeExists(string $name): bool
+    {
+        return array_search($name, self::$typeNames) !== false;
+    }
 }

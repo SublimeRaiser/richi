@@ -10,7 +10,7 @@ use App\Entity\Person;
 use App\Entity\Tag;
 use App\Form\DataTransformer\KopecksToRublesTransformer;
 use App\Repository\AccountRepository;
-use App\Repository\CategoryRepository;
+use App\Repository\BaseCategoryRepository;
 use App\Repository\FundRepository;
 use App\Repository\PersonRepository;
 use App\Repository\TagRepository;
@@ -62,7 +62,7 @@ class OperationType extends AbstractType
         $operationType = $options['operation_type'];
         /** @var AccountRepository $accountRepo */
         $accountRepo  = $this->em->getRepository(Account::class);
-        /** @var CategoryRepository $categoryRepo */
+        /** @var BaseCategoryRepository $categoryRepo */
         $categoryRepo = $this->em->getRepository(BaseCategory::class);
         /** @var PersonRepository $personRepo */
         $personRepo   = $this->em->getRepository(Person::class);
