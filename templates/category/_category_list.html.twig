@@ -10,10 +10,10 @@
             <td><img src="#" alt=""></td>
             <td>{{ category }}</td>
             <td>
-                <a href="{{ path('category_edit', {'id': category.id}) }}">Edit</a>
+                <a href="{{ path('category_edit', {'operationName': operationName, 'id': category.id}) }}">Edit</a>
                 <a href="#"
                    class="js-category-delete"
-                   data-url="{{ path('category_delete', {'id': category.id}) }}"
+                   data-url="{{ path('category_delete', {'operationName': operationName, 'id': category.id}) }}"
                    data-name="{{ category }}">Delete</a>
             </td>
         </tr>

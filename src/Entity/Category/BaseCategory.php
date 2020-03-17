@@ -3,11 +3,22 @@
 namespace App\Entity\Category;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @ORM\MappedSuperclass()
  * @ORM\HasLifecycleCallbacks()
+ * @ORM\Table(
+ *     uniqueConstraints={
+ *         @ORM\UniqueConstraint(name="category_uq", columns={"user_id", "parent_id", "name"})
+ *     }
+ * )
+ * @UniqueEntity(
+ *     fields={"user", "parent", "name"},
+ *     errorPath="name",
+ *     message="Category with the same name already exists."
+ * )
  */
 abstract class BaseCategory
 {
@@ -27,6 +38,11 @@ abstract class BaseCategory
      * @ORM\JoinColumn(nullable=false)
      */
     protected $user;
+
+    /**
+     * @var self|null
+     */
+    protected $parent;
 
     /**
      * @var string
@@ -65,6 +81,18 @@ abstract class BaseCategory
         $this->createdAt  = $now;
         $this->updatedAt  = $now;
     }
+    /**
+     * @return string
+     */
+    public function __toString(): string
+    {
+        $string = $this->name;
+        if ($this->parent) {
+            $string = $this->parent->getName() . ' / ' . $string;
+        }
+
+        return $string;
+    }
 
     /**
      * @return integer|null
@@ -85,11 +113,31 @@ abstract class BaseCategory
     /**
      * @param UserInterface|null $user
      *
-     * @return BaseCategory
+     * @return self
      */
     public function setUser(?UserInterface $user): self
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    /**
+     * @return self|null
+     */
+    public function getParent(): ?self
+    {
+        return $this->parent;
+    }
+
+    /**
+     * @param self|null $parent
+     *
+     * @return self
+     */
+    public function setParent(?self $parent): self
+    {
+        $this->parent = $parent;
 
         return $this;
     }
@@ -105,7 +153,7 @@ abstract class BaseCategory
     /**
      * @param string $name
      *
-     * @return BaseCategory
+     * @return self
      */
     public function setName(string $name): self
     {
@@ -125,7 +173,7 @@ abstract class BaseCategory
     /**
      * @param string|null $icon
      *
-     * @return BaseCategory
+     * @return self
      */
     public function setIcon(?string $icon): self
     {

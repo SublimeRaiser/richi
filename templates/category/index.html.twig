@@ -9,11 +9,11 @@
     </div>
     <div style="float: left; padding-right: 100px">
         <h1>Expense categories:</h1>
-        {% include 'category/_category_list.html.twig' with {'categories': expenseCategories} %}
+        {% include 'category/_category_list.html.twig' with {'categories': expenseCategories, 'operationName': 'expense'} %}
     </div>
     <div style="float: left">
         <h1>Income categories:</h1>
-        {% include 'category/_category_list.html.twig' with {'categories': incomeCategories} %}
+        {% include 'category/_category_list.html.twig' with {'categories': incomeCategories, 'operationName': 'income'} %}
     </div>
 {% endblock %}
 
