@@ -3,22 +3,11 @@
 namespace App\Entity\Category;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @ORM\MappedSuperclass()
  * @ORM\HasLifecycleCallbacks()
- * @ORM\Table(
- *     uniqueConstraints={
- *         @ORM\UniqueConstraint(name="category_uq", columns={"user_id", "parent_id", "name"})
- *     }
- * )
- * @UniqueEntity(
- *     fields={"user", "parent", "name"},
- *     errorPath="name",
- *     message="Category with the same name already exists."
- * )
  */
 abstract class BaseCategory
 {
@@ -38,11 +27,6 @@ abstract class BaseCategory
      * @ORM\JoinColumn(nullable=false)
      */
     protected $user;
-
-    /**
-     * @var self|null
-     */
-    protected $parent;
 
     /**
      * @var string
@@ -118,26 +102,6 @@ abstract class BaseCategory
     public function setUser(?UserInterface $user): self
     {
         $this->user = $user;
-
-        return $this;
-    }
-
-    /**
-     * @return self|null
-     */
-    public function getParent(): ?self
-    {
-        return $this->parent;
-    }
-
-    /**
-     * @param self|null $parent
-     *
-     * @return self
-     */
-    public function setParent(?self $parent): self
-    {
-        $this->parent = $parent;
 
         return $this;
     }
