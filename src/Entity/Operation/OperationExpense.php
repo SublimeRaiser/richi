@@ -13,7 +13,7 @@ class OperationExpense extends BaseOperationCashFlow
     /**
      * @var CategoryExpense
      *
-     * @ORM\ManyToOne(targetEntity="CategoryExpense")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Category\CategoryExpense")
      */
     protected $category;
 

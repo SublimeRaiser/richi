@@ -6,11 +6,11 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\Category\IncomeCategoryRepository")
+ * @ORM\Entity(repositoryClass="App\Repository\Category\CategoryIncomeRepository")
  * @ORM\Table(
- *     name="income_category",
+ *     name="category_income",
  *     uniqueConstraints={
- *         @ORM\UniqueConstraint(name="income_category_uq", columns={"user_id", "parent_id", "name"})
+ *         @ORM\UniqueConstraint(name="category_income_uq", columns={"user_id", "parent_id", "name"})
  *     }
  * )
  * @UniqueEntity(
@@ -19,17 +19,17 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *     message="Income category with the same name already exists."
  * )
  */
-class IncomeCategory extends BaseCategory
+class CategoryIncome extends BaseCategory
 {
     /**
-     * @var IncomeCategory|null
+     * @var CategoryIncome|null
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Category\IncomeCategory")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Category\CategoryIncome")
      */
     protected $parent;
 
     /**
-     * @return IncomeCategory|null
+     * @return CategoryIncome|null
      */
     public function getParent(): ?self
     {
@@ -37,11 +37,11 @@ class IncomeCategory extends BaseCategory
     }
 
     /**
-     * @param IncomeCategory|null $parent
+     * @param CategoryIncome|null $parent
      *
-     * @return IncomeCategory
+     * @return CategoryIncome
      */
-    public function setParent(?IncomeCategory $parent): self
+    public function setParent(?CategoryIncome $parent): self
     {
         $this->parent = $parent;
 

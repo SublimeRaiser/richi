@@ -6,11 +6,11 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\Category\ExpenseCategoryRepository")
+ * @ORM\Entity(repositoryClass="App\Repository\Category\CategoryExpenseRepository")
  * @ORM\Table(
- *     name="expense_category",
+ *     name="category_expense",
  *     uniqueConstraints={
- *         @ORM\UniqueConstraint(name="expense_category_uq", columns={"user_id", "parent_id", "name"})
+ *         @ORM\UniqueConstraint(name="category_expense_uq", columns={"user_id", "parent_id", "name"})
  *     }
  * )
  * @UniqueEntity(
@@ -19,17 +19,17 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *     message="Expense category with the same name already exists."
  * )
  */
-class ExpenseCategory extends BaseCategory
+class CategoryExpense extends BaseCategory
 {
     /**
-     * @var ExpenseCategory|null
+     * @var CategoryExpense|null
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Category\ExpenseCategory")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Category\CategoryExpense")
      */
     protected $parent;
 
     /**
-     * @return ExpenseCategory|null
+     * @return CategoryExpense|null
      */
     public function getParent(): ?self
     {
@@ -37,11 +37,11 @@ class ExpenseCategory extends BaseCategory
     }
 
     /**
-     * @param ExpenseCategory|null $parent
+     * @param CategoryExpense|null $parent
      *
-     * @return ExpenseCategory
+     * @return CategoryExpense
      */
-    public function setParent(?ExpenseCategory $parent): self
+    public function setParent(?CategoryExpense $parent): self
     {
         $this->parent = $parent;
 
