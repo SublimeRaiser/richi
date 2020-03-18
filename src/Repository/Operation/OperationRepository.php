@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Repository;
+namespace App\Repository\Operation;
 
 use App\Entity\Account;
 use App\Entity\Fund;
 use App\Entity\Identifiable;
-use App\Entity\BaseOperation;
+use App\Entity\Operation\BaseOperation;
 use App\Entity\Person;
 use App\Enum\OperationTypeEnum;
+use App\Repository\BaseRepository;
 use App\ValueObject\AccountCash;
 use App\ValueObject\FundCash;
 use App\ValueObject\PersonObligation;

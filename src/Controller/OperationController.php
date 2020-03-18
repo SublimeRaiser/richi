@@ -2,11 +2,11 @@
 
 namespace App\Controller;
 
-use App\Entity\BaseOperation;
-use App\Entity\Operation\IncomeOperation;
+use App\Entity\Operation\BaseOperation;
+use App\Entity\Operation\OperationIncome;
 use App\Enum\OperationTypeEnum;
 use App\Form\OperationType;
-use App\Repository\OperationRepository;
+use App\Repository\Operation\OperationRepository;
 use App\Service\OperationList;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -79,7 +79,7 @@ class OperationController extends AbstractController
             throw new BadRequestHttpException($e->getMessage());
         }
 
-        $operation = new IncomeOperation();
+        $operation = new OperationIncome();
         $operation->setType($operationType);
 
         $form = $this->createForm(OperationType::class, $operation, [
@@ -90,7 +90,7 @@ class OperationController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var UserInterface $user */
             $user = $this->getUser();
-            /** @var IncomeOperation $operation */
+            /** @var OperationIncome $operation */
             $operation = $form->getData();
             $operation->setUser($user);
 
@@ -109,12 +109,12 @@ class OperationController extends AbstractController
     /**
      * @Route("/copy/{id}", name="operation_copy", methods={"GET", "POST"})
      *
-     * @param IncomeOperation $operation
+     * @param OperationIncome $operation
      * @param Request   $request
      *
      * @return Response
      */
-    public function copy(IncomeOperation $operation, Request $request): Response
+    public function copy(OperationIncome $operation, Request $request): Response
     {
         $this->denyAccessUnlessGranted('OPERATION_COPY', $operation);
 
@@ -124,7 +124,7 @@ class OperationController extends AbstractController
         ]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            /** @var IncomeOperation $clonedOperation */
+            /** @var OperationIncome $clonedOperation */
             $clonedOperation = $form->getData();
 
             $em = $this->getDoctrine()->getManager();
@@ -144,12 +144,12 @@ class OperationController extends AbstractController
     /**
      * @Route("/edit/{id}", name="operation_edit", methods={"GET", "POST"})
      *
-     * @param IncomeOperation $operation
+     * @param OperationIncome $operation
      * @param Request   $request
      *
      * @return Response
      */
-    public function edit(IncomeOperation $operation, Request $request): Response
+    public function edit(OperationIncome $operation, Request $request): Response
     {
         $this->denyAccessUnlessGranted('OPERATION_EDIT', $operation);
 
@@ -158,7 +158,7 @@ class OperationController extends AbstractController
         ]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            /** @var IncomeOperation $operation */
+            /** @var OperationIncome $operation */
             $operation = $form->getData();
 
             $em = $this->getDoctrine()->getManager();
@@ -178,11 +178,11 @@ class OperationController extends AbstractController
     /**
      * @Route("/{id}", name="operation_delete", methods={"DELETE"})
      *
-     * @param IncomeOperation $operation
+     * @param OperationIncome $operation
      *
      * @return Response
      */
-    public function delete(IncomeOperation $operation): Response
+    public function delete(OperationIncome $operation): Response
     {
         $this->denyAccessUnlessGranted('OPERATION_DELETE', $operation);
 

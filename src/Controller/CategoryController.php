@@ -3,12 +3,12 @@
 namespace App\Controller;
 
 use App\Entity\Category\BaseCategory;
-use App\Entity\Category\ExpenseCategory;
-use App\Entity\Category\IncomeCategory;
+use App\Entity\Category\CategoryExpense;
+use App\Entity\Category\CategoryIncome;
 use App\Enum\OperationTypeEnum;
 use App\Repository\Category\BaseCategoryRepository;
-use App\Repository\Category\ExpenseCategoryRepository;
-use App\Repository\Category\IncomeCategoryRepository;
+use App\Repository\Category\CategoryExpenseRepository;
+use App\Repository\Category\CategoryIncomeRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -53,11 +53,11 @@ class CategoryController extends AbstractController
 
         $user = $this->getUser();
 
-        /** @var IncomeCategoryRepository $incomeCategoryRepo */
-        $incomeCategoryRepo  = $this->getDoctrine()->getRepository(IncomeCategory::class);
+        /** @var CategoryIncomeRepository $incomeCategoryRepo */
+        $incomeCategoryRepo  = $this->getDoctrine()->getRepository(CategoryIncome::class);
         $incomeCategories    = $incomeCategoryRepo->findByUser($user);
-        /** @var ExpenseCategoryRepository $expenseCategoryRepo */
-        $expenseCategoryRepo = $this->getDoctrine()->getRepository(ExpenseCategory::class);
+        /** @var CategoryExpenseRepository $expenseCategoryRepo */
+        $expenseCategoryRepo = $this->getDoctrine()->getRepository(CategoryExpense::class);
         $expenseCategories   = $expenseCategoryRepo->findByUser($user);
 
         return $this->render('category/index.html.twig', [

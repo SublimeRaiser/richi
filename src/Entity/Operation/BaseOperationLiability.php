@@ -7,40 +7,40 @@ use App\Entity\Person;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity()
+ * @ORM\MappedSuperclass()
  */
-class DebtOperation extends BaseOperation
+abstract class BaseOperationLiability extends BaseOperation
 {
     /**
      * @var Account|null
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\Account")
      */
-    private $targetAccount;
+    protected $account;
 
     /**
      * @var Person|null
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\Person")
      */
-    private $person;
+    protected $person;
 
     /**
      * @return Account|null
      */
-    public function getTargetAccount(): ?Account
+    public function getAccount(): ?Account
     {
-        return $this->targetAccount;
+        return $this->account;
     }
 
     /**
      * @param Account|null $account
      *
-     * @return DebtOperation
+     * @return BaseOperationLiability
      */
-    public function setTargetAccount(?Account $account): self
+    public function setAccount(?Account $account): self
     {
-        $this->targetAccount = $account;
+        $this->account = $account;
 
         return $this;
     }
@@ -56,7 +56,7 @@ class DebtOperation extends BaseOperation
     /**
      * @param Person|null $person
      *
-     * @return DebtOperation
+     * @return BaseOperationLiability
      */
     public function setPerson(?Person $person): self
     {

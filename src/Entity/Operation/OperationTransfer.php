@@ -8,38 +8,38 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity()
  */
-class TransferOperation extends BaseOperation
+class OperationTransfer extends BaseOperation
 {
     /**
      * @var Account|null
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\Account")
      */
-    private $sourceAccount;
+    private $source;
 
     /**
      * @var Account|null
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\Account")
      */
-    private $targetAccount;
+    private $target;
 
     /**
      * @return Account|null
      */
-    public function getSourceAccount(): ?Account
+    public function getSource(): ?Account
     {
-        return $this->sourceAccount;
+        return $this->source;
     }
 
     /**
      * @param Account|null $account
      *
-     * @return TransferOperation
+     * @return OperationTransfer
      */
-    public function setSourceAccount(?Account $account): self
+    public function setSource(?Account $account): self
     {
-        $this->sourceAccount = $account;
+        $this->source = $account;
 
         return $this;
     }
@@ -47,19 +47,19 @@ class TransferOperation extends BaseOperation
     /**
      * @return Account|null
      */
-    public function getTargetAccount(): ?Account
+    public function getTarget(): ?Account
     {
-        return $this->targetAccount;
+        return $this->target;
     }
 
     /**
      * @param Account|null $account
      *
-     * @return TransferOperation
+     * @return OperationTransfer
      */
-    public function setTargetAccount(?Account $account): self
+    public function setTarget(?Account $account): self
     {
-        $this->targetAccount = $account;
+        $this->target = $account;
 
         return $this;
     }

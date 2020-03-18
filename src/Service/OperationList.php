@@ -3,7 +3,7 @@
 
 namespace App\Service;
 
-use App\Entity\BaseOperation;
+use App\Entity\Operation\BaseOperation;
 use App\Repository\OperationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;

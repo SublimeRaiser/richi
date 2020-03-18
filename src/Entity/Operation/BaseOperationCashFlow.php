@@ -3,76 +3,52 @@
 namespace App\Entity\Operation;
 
 use App\Entity\Account;
-use App\Entity\Category\ExpenseCategory;
 use App\Entity\Fund;
 use App\Entity\Tag;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity()
+ * @ORM\MappedSuperclass()
  */
-class ExpenseOperation extends BaseOperation
+abstract class BaseOperationCashFlow extends BaseOperation
 {
     /**
-     * @var Account|null
+     * @var Account
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\Account")
      */
-    private $sourceAccount;
+    protected $account;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Category\ExpenseCategory")
-     */
-    private $category;
-
-    /**
+     * @var Tag|null
+     *
      * @ORM\ManyToOne(targetEntity="App\Entity\Tag")
      */
-    private $tag;
+    protected $tag;
 
     /**
-     * @var Fund
+     * @var Fund|null
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\Fund")
      */
-    private $fund;
+    protected $fund;
 
     /**
      * @return Account|null
      */
-    public function getSourceAccount(): ?Account
+    public function getAccount(): ?Account
     {
-        return $this->sourceAccount;
+        return $this->account;
     }
 
     /**
-     * @param Account|null $account
+     * @param Account $account
      *
-     * @return ExpenseOperation
+     * @return self
      */
-    public function setSourceAccount(?Account $account): self
+    public function setAccount(Account $account): self
     {
-        $this->sourceAccount = $account;
-
-        return $this;
-    }
-
-     /**
-     * @return ExpenseCategory|null
-     */
-    public function getCategory(): ?ExpenseCategory
-    {
-        return $this->category;
-    }
-
-    /**
-     * @param ExpenseCategory|null $category
-     *
-     * @return ExpenseOperation
-     */
-    public function setCategory(?ExpenseCategory $category): self
-    {
-        $this->category = $category;
+        $this->account = $account;
 
         return $this;
     }
@@ -88,7 +64,7 @@ class ExpenseOperation extends BaseOperation
     /**
      * @param Tag|null $tag
      *
-     * @return ExpenseOperation
+     * @return self
      */
     public function setTag(?Tag $tag): self
     {
@@ -108,7 +84,7 @@ class ExpenseOperation extends BaseOperation
     /**
      * @param Fund|null $fund
      *
-     * @return ExpenseOperation
+     * @return self
      */
     public function setFund(?Fund $fund): self
     {
