@@ -214,7 +214,7 @@ class CategoryController extends AbstractController
      */
     private function getClassNameByOperationName(string $operationName): string
     {
-        return 'App\\Entity\\Category\\' . ucfirst($operationName) . 'Category';
+        return 'App\\Entity\\Category\\' . 'Category'. ucfirst($operationName);
     }
 
     /**
@@ -226,6 +226,6 @@ class CategoryController extends AbstractController
      */
     private function getTypeNameByOperationName(string $operationName): string
     {
-        return 'App\\Form\\Category\\' . ucfirst($operationName) . 'CategoryType';
+        return 'App\\Form\\Category\\' . 'Category' . ucfirst($operationName) . 'Type';
     }
 }

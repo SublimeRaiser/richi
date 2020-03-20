@@ -2,13 +2,13 @@
 
 namespace App\Form\Category;
 
-use App\Entity\Category\CategoryExpense;
-use App\Repository\Category\CategoryExpenseRepository;
+use App\Entity\Category\CategoryIncome;
+use App\Repository\Category\CategoryIncomeRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class ExpenseCategoryType extends BaseCategoryType
+class CategoryIncomeType extends BaseCategoryType
 {
     /**
      * {@inheritdoc}
@@ -17,11 +17,11 @@ class ExpenseCategoryType extends BaseCategoryType
     {
         parent::buildForm($builder, $options);
 
-        /** @var CategoryExpenseRepository $categoryRepo */
-        $categoryRepo = $this->em->getRepository(CategoryExpense::class);
+        /** @var CategoryIncomeRepository $categoryRepo */
+        $categoryRepo = $this->em->getRepository(CategoryIncome::class);
         $builder
             ->add('parent', EntityType::class, [
-                'class'        => CategoryExpense::class,
+                'class'        => CategoryIncome::class,
                 'choices'      => $categoryRepo->findAbleToBeParent($this->user),
                 'empty_data'   => null,
                 'placeholder'  => '---',
@@ -36,7 +36,7 @@ class ExpenseCategoryType extends BaseCategoryType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => CategoryExpense::class,
+            'data_class' => CategoryIncome::class,
         ]);
     }
 }
