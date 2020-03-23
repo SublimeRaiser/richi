@@ -5,16 +5,13 @@ namespace App\Controller;
 use App\Entity\Category\BaseCategory;
 use App\Entity\Category\CategoryExpense;
 use App\Entity\Category\CategoryIncome;
-use App\Enum\OperationTypeEnum;
 use App\Repository\Category\BaseCategoryRepository;
 use App\Repository\Category\CategoryExpenseRepository;
 use App\Repository\Category\CategoryIncomeRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -25,11 +22,9 @@ use Symfony\Component\Security\Core\User\UserInterface;
  *
  * @Route("/category")
  */
-class CategoryController extends AbstractController
+class CategoryController extends BaseController
 {
-    /**
-     * @var EntityManagerInterface
-     */
+    /** @var EntityManagerInterface */
     private $em;
 
     /**
@@ -165,20 +160,6 @@ class CategoryController extends AbstractController
         return new JsonResponse([       // TODO fix it
             'data' => 'Category deleted successfully',
         ]);
-    }
-
-    /**
-     * Throws the exception if provided operation name is not supported.
-     *
-     * @param string $operationName
-     *
-     * @return void
-     */
-    private function checkOperationName(string $operationName): void
-    {
-        if (!OperationTypeEnum::isTypeExists($operationName)) {
-            throw new BadRequestHttpException('Unsupported operation name provided.');
-        }
     }
 
     /**

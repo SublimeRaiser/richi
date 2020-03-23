@@ -8,7 +8,6 @@ use App\Enum\OperationTypeEnum;
 use App\Form\OperationType;
 use App\Repository\Operation\OperationRepository;
 use App\Service\OperationList;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,7 +21,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  *
  * @Route("/operation")
  */
-class OperationController extends AbstractController
+class OperationController extends BaseController
 {
     /** @var OperationList */
     private $operationList;
