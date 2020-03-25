@@ -27,24 +27,4 @@ class CategoryExpense extends BaseCategory
      * @ORM\ManyToOne(targetEntity="App\Entity\Category\CategoryExpense")
      */
     protected $parent;
-
-    /**
-     * @return CategoryExpense|null
-     */
-    public function getParent(): ?self
-    {
-        return $this->parent;
-    }
-
-    /**
-     * @param CategoryExpense|null $parent
-     *
-     * @return CategoryExpense
-     */
-    public function setParent(?CategoryExpense $parent): self
-    {
-        $this->parent = $parent;
-
-        return $this;
-    }
 }

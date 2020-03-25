@@ -2,16 +2,18 @@
 
 namespace App\Controller;
 
+use App\Entity\Category\BaseCategory;
 use App\Entity\Operation\BaseOperation;
 use App\Entity\Operation\OperationIncome;
 use App\Enum\OperationTypeEnum;
 use App\Form\OperationType;
 use App\Repository\Operation\OperationRepository;
 use App\Service\OperationList;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -21,7 +23,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  *
  * @Route("/operation")
  */
-class OperationController extends BaseController
+class OperationController extends AbstractController
 {
     /** @var OperationList */
     private $operationList;
@@ -46,12 +48,19 @@ class OperationController extends BaseController
         $this->denyAccessUnlessGranted('ROLE_USER');
 
         $user              = $this->getUser();
-        $groupedOperations = $this->operationList->getGroupedByDays($user);
+//        $groupedOperations = $this->operationList->getGroupedByDays($user);
 
         /** @var OperationRepository $operationRepo */
-        $operationRepo = $this->getDoctrine()->getRepository(BaseOperation::class);
-        $expenseSum    = $operationRepo->getUserExpenseSum($user);
-        $incomeSum     = $operationRepo->getUserIncomeSum($user);
+//        $operationRepo = $this->getDoctrine()->getRepository(BaseOperation::class);
+//        $expenseSum    = $operationRepo->getUserExpenseSum($user);
+//        $incomeSum     = $operationRepo->getUserIncomeSum($user);
+
+
+
+        $groupedOperations = [];
+        $expenseSum    = 0;
+        $incomeSum     = 0;
+
 
         return $this->render('operation/index.html.twig', [
             'groupedOperations' => $groupedOperations,
@@ -61,29 +70,21 @@ class OperationController extends BaseController
     }
 
     /**
-     * @Route("/new/{operationName}", name="operation_new", methods={"GET", "POST"})
+     * @Route("/new/{operationSlug}", name="operation_new", methods={"GET", "POST"})
      *
-     * @param string  $operationName
+     * @param string  $operationSlug
      * @param Request $request
      *
      * @return Response
      */
-    public function new(string $operationName, Request $request): Response
+    public function new(string $operationSlug, Request $request): Response
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
-
-        try {
-            $operationType = OperationTypeEnum::getTypeByName($operationName);
-        } catch (\Exception $e) {
-            throw new BadRequestHttpException($e->getMessage());
-        }
+        $this->operationSlugValidate($operationSlug);
 
         $operation = new OperationIncome();
-        $operation->setType($operationType);
 
-        $form = $this->createForm(OperationType::class, $operation, [
-            'operation_type' => $operationType,
-        ]);
+        $form = $this->createForm(OperationType::class, $operation);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -100,7 +101,7 @@ class OperationController extends BaseController
             return $this->redirectToRoute('operation_index');
         }
 
-        return $this->render('operation/new_'.$operationName.'.html.twig', [
+        return $this->render('operation/new_'.$operationSlug.'.html.twig', [
             'operationForm' => $form->createView(),
         ]);
     }
@@ -135,7 +136,7 @@ class OperationController extends BaseController
 
         $operationType = $clonedOperation->getType();
 
-        return $this->render('operation/copy_'.OperationTypeEnum::getTypeName($operationType).'.html.twig', [
+        return $this->render('operation/copy_'.OperationTypeEnum::getTypeSlug($operationType).'.html.twig', [
             'operationForm' => $form->createView(),
         ]);
     }
@@ -169,7 +170,7 @@ class OperationController extends BaseController
 
         $operationType = $operation->getType();
 
-        return $this->render('operation/edit_'.OperationTypeEnum::getTypeName($operationType).'.html.twig', [
+        return $this->render('operation/edit_'.OperationTypeEnum::getTypeSlug($operationType).'.html.twig', [
             'operationForm' => $form->createView(),
         ]);
     }
@@ -192,5 +193,53 @@ class OperationController extends BaseController
         return new JsonResponse([       // TODO fix it
             'data' => 'Operation deleted successfully',
         ]);
+    }
+
+    /**
+     * Returns operation with the given ID for provided operation name.
+     *
+     * @param string  $operationName
+     * @param integer $id
+     *
+     * @return BaseCategory
+     *
+     * @throws NotFoundHttpException If category was not found
+     */
+    private function findOperation(string $operationName, int $id): BaseOperation
+    {
+        $operationClassName = $this->getClassNameByOperationName($operationName);
+        /** @var OperationRepository $operationRepo */
+        $operationRepo = $this->getDoctrine()->getRepository($operationClassName);
+        /** @var BaseCategory|null $category */
+        $category = $operationRepo->find($id);
+        if (!$category) {
+            throw $this->createNotFoundException(ucfirst($operationName) . ' category not found.');
+        }
+
+        return $category;
+    }
+
+    /**
+     * Returns class name for an operation depending on the operation name.
+     *
+     * @param string $operationName
+     *
+     * @return string
+     */
+    private function getClassNameByOperationName(string $operationName): string
+    {
+        return 'App\\Entity\\Operation\\' . 'Operation'. ucfirst($operationName);
+    }
+
+    /**
+     * Returns class name for an operation form type depending on the operation name.
+     *
+     * @param string $operationName
+     *
+     * @return string
+     */
+    private function getFormNameByOperationName(string $operationName): string
+    {
+        return 'App\\Form\\Operation\\' . 'Operation' . ucfirst($operationName) . 'Type';
     }
 }

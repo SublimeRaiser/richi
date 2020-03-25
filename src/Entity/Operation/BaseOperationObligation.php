@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\MappedSuperclass()
  */
-abstract class BaseOperationLiability extends BaseOperation
+abstract class BaseOperationObligation extends BaseOperation
 {
     /**
      * @var Account|null
@@ -36,7 +36,7 @@ abstract class BaseOperationLiability extends BaseOperation
     /**
      * @param Account|null $account
      *
-     * @return BaseOperationLiability
+     * @return BaseOperationObligation
      */
     public function setAccount(?Account $account): self
     {
@@ -56,7 +56,7 @@ abstract class BaseOperationLiability extends BaseOperation
     /**
      * @param Person|null $person
      *
-     * @return BaseOperationLiability
+     * @return BaseOperationObligation
      */
     public function setPerson(?Person $person): self
     {

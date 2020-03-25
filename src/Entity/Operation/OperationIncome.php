@@ -6,7 +6,7 @@ use App\Entity\Category\CategoryIncome;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="App\Repository\Operation\OperationRepository")
  */
 class OperationIncome extends BaseOperationCashFlow
 {

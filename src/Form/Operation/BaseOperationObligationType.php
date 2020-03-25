@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Form;
+namespace App\Form\Operation;
 
 use App\Entity\Account;
 use App\Entity\BaseCategory;
@@ -24,34 +24,8 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class OperationType extends AbstractType
+abstract class BaseOperationObligationType extends BaseOperationType
 {
-    /** @var Security */
-    private $security;
-
-    /** @var EntityManagerInterface */
-    private $em;
-
-    /** @var KopecksToRublesTransformer */
-    private $transformer;
-
-    /**
-     * OperationType constructor.
-     *
-     * @param Security                   $security
-     * @param EntityManagerInterface     $em
-     * @param KopecksToRublesTransformer $transformer
-     */
-    public function __construct(
-        Security $security,
-        EntityManagerInterface $em,
-        KopecksToRublesTransformer $transformer
-    ) {
-        $this->security    = $security;
-        $this->em          = $em;
-        $this->transformer = $transformer;
-    }
-
     /**
      * {@inheritdoc}
      */

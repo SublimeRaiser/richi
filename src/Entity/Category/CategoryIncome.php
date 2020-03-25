@@ -27,24 +27,4 @@ class CategoryIncome extends BaseCategory
      * @ORM\ManyToOne(targetEntity="App\Entity\Category\CategoryIncome")
      */
     protected $parent;
-
-    /**
-     * @return CategoryIncome|null
-     */
-    public function getParent(): ?self
-    {
-        return $this->parent;
-    }
-
-    /**
-     * @param CategoryIncome|null $parent
-     *
-     * @return CategoryIncome
-     */
-    public function setParent(?CategoryIncome $parent): self
-    {
-        $this->parent = $parent;
-
-        return $this;
-    }
 }

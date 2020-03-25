@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Service\DebtMonitor;
 use App\Service\LoanMonitor;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -13,7 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
  *
  * @Route("/debt-and-loan")
  */
-class DebtAndLoanController extends BaseController
+class DebtAndLoanController extends AbstractController
 {
     /** @var DebtMonitor */
     private $debtMonitor;

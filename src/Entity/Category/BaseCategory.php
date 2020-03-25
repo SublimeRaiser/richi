@@ -2,14 +2,18 @@
 
 namespace App\Entity\Category;
 
+use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
+use InvalidArgumentException;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @ORM\MappedSuperclass()
  * @ORM\HasLifecycleCallbacks()
  */
-abstract class BaseCategory
+abstract class BaseCategory implements CategoryParentAwareInterface
 {
     /**
      * @var integer
@@ -43,25 +47,30 @@ abstract class BaseCategory
     protected $icon;
 
     /**
-     * @var \DateTimeInterface
+     * @var DateTimeInterface
      *
      * @ORM\Column(type="datetime")
      */
     protected $createdAt;
 
     /**
-     * @var \DateTimeInterface
+     * @var DateTimeInterface
      *
      * @ORM\Column(type="datetime")
      */
     protected $updatedAt;
 
     /**
-     * @throws \Exception
+     * @var self|null
+     */
+    protected $parent;
+
+    /**
+     * @throws Exception
      */
     public function __construct()
     {
-        $now              = new \DateTime();
+        $now              = new DateTime();
         $this->createdAt  = $now;
         $this->updatedAt  = $now;
     }
@@ -147,28 +156,54 @@ abstract class BaseCategory
     }
 
     /**
-     * @return \DateTimeInterface|null
+     * @return DateTimeInterface|null
      */
-    public function getCreatedAt(): ?\DateTimeInterface
+    public function getCreatedAt(): ?DateTimeInterface
     {
         return $this->createdAt;
     }
 
     /**
-     * @return \DateTimeInterface|null
+     * @return DateTimeInterface|null
      */
-    public function getUpdatedAt(): ?\DateTimeInterface
+    public function getUpdatedAt(): ?DateTimeInterface
     {
         return $this->updatedAt;
+    }
+
+    /**
+     * @return BaseCategory|null
+     */
+    public function getParent(): ?BaseCategory
+    {
+        return $this->parent;
+    }
+
+    /**
+     * @param BaseCategory|null $parent
+     *
+     * @return BaseCategory
+     */
+    public function setParent(?BaseCategory $parent): BaseCategory
+    {
+        if (!$parent instanceof self) {
+            throw new InvalidArgumentException('Invalid parent class.');
+        }
+
+        $this->parent = $parent;
+
+        return $this;
     }
 
     /**
      * @ORM\PreUpdate
      *
      * @return void
+     *
+     * @throws Exception
      */
     public function setUpdatedAtValue(): void
     {
-        $this->updatedAt = new \DateTime();
+        $this->updatedAt = new DateTime();
     }
 }

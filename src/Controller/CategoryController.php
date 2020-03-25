@@ -8,10 +8,13 @@ use App\Entity\Category\CategoryIncome;
 use App\Repository\Category\BaseCategoryRepository;
 use App\Repository\Category\CategoryExpenseRepository;
 use App\Repository\Category\CategoryIncomeRepository;
+use App\Service\OperationNameFormatter;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -22,19 +25,24 @@ use Symfony\Component\Security\Core\User\UserInterface;
  *
  * @Route("/category")
  */
-class CategoryController extends BaseController
+class CategoryController extends AbstractController
 {
     /** @var EntityManagerInterface */
     private $em;
+
+    /** @var OperationNameFormatter */
+    private $operationNameFormatter;
 
     /**
      * CategoryController constructor.
      *
      * @param EntityManagerInterface $em
+     * @param OperationNameFormatter $operationNameFormatter
      */
-    public function __construct(EntityManagerInterface $em)
+    public function __construct(EntityManagerInterface $em, OperationNameFormatter $operationNameFormatter)
     {
-        $this->em = $em;
+        $this->em                     = $em;
+        $this->operationNameFormatter = $operationNameFormatter;
     }
 
     /**
@@ -62,28 +70,29 @@ class CategoryController extends BaseController
     }
 
     /**
-     * @Route("/new/{operationName}", name="category_new", methods={"GET", "POST"})
+     * @Route("/new/{operationSlug}", name="category_new", methods={"GET", "POST"})
      *
      * @param string  operationName
      * @param Request $request
      *
      * @return Response
      */
-    public function new(string $operationName, Request $request): Response
+    public function new(string $operationSlug, Request $request): Response
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
-        $this->checkOperationName($operationName);
 
-        /** @var UserInterface $user */
-        $user = $this->getUser();
+        $operationType = $this->operationNameFormatter->getTypeBySlug($operationSlug);
+        $this->validateOperationType($operationType);
 
-        $categoryClassName = $this->getClassNameByOperationName($operationName);
+        $categoryClassName = $this->getCategoryClassName($operationType);
         /** @var BaseCategory $category */
         $category = new $categoryClassName();
+        /** @var UserInterface $user */
+        $user = $this->getUser();
         $category->setUser($user);
 
-        $typeName = $this->getTypeNameByOperationName($operationName);
-        $form     = $this->createForm($typeName, $category);
+        $formClassName = $this->getFormClassName($operationType);
+        $form          = $this->createForm($formClassName, $category);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -98,12 +107,12 @@ class CategoryController extends BaseController
 
         return $this->render('category/new.html.twig', [
             'categoryForm'  => $form->createView(),
-            'operationName' => $operationName,
+            'operationName' => $this->operationNameFormatter->getNameBySlug($operationSlug),
         ]);
     }
 
     /**
-     * @Route("/edit/{operationName}/{id}", name="category_edit", methods={"GET", "POST"})
+     * @Route("/edit/{operationSlug}/{id}", name="category_edit", methods={"GET", "POST"})
      *
      * @param string   operationName
      * @param integer  $id
@@ -111,16 +120,19 @@ class CategoryController extends BaseController
      *
      * @return Response
      */
-    public function edit(string $operationName, int $id, Request $request): Response
+    public function edit(string $operationSlug, int $id, Request $request): Response
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
-        $this->checkOperationName($operationName);
 
-        $category = $this->findCategory($operationName, $id);
+        $operationType = $this->operationNameFormatter->getTypeBySlug($operationSlug);
+        $this->validateOperationType($operationType);
+
+        /** @var BaseCategory $category */
+        $category = $this->findCategory($operationType, $id);
         $this->denyAccessUnlessGranted('CATEGORY_EDIT', $category);
 
-        $typeName = $this->getTypeNameByOperationName($operationName);
-        $form     = $this->createForm($typeName, $category);
+        $formClassName = $this->getFormClassName($operationType);
+        $form          = $this->createForm($formClassName, $category);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $category = $form->getData();
@@ -133,25 +145,28 @@ class CategoryController extends BaseController
 
         return $this->render('category/edit.html.twig', [
             'categoryForm'  => $form->createView(),
-            'operationName' => $operationName,
+            'operationName' => $this->operationNameFormatter->getNameBySlug($operationSlug),
+            'operationSlug' => $operationSlug,
             'parentName'    => $category->getParent() ? $category->getParent()->getName() : null,
         ]);
     }
 
     /**
-     * @Route("/{operationName}/{id}", name="category_delete", methods={"DELETE"})
+     * @Route("/{operationSlug}/{id}", name="category_delete", methods={"DELETE"})
      *
      * @param string  operationName
      * @param integer $id
      *
      * @return Response
      */
-    public function delete(string $operationName, int $id): Response
+    public function delete(string $operationSlug, int $id): Response
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
-        $this->checkOperationName($operationName);
 
-        $category = $this->findCategory($operationName, $id);
+        $operationType = $this->operationNameFormatter->getTypeBySlug($operationSlug);
+        $this->validateOperationType($operationType);
+
+        $category = $this->findCategory($operationType, $id);
         $this->denyAccessUnlessGranted('CATEGORY_DELETE', $category);
 
         $this->em->remove($category);
@@ -163,50 +178,84 @@ class CategoryController extends BaseController
     }
 
     /**
-     * Returns category with the given ID for provided operation name.
+     * Returns category with the given ID for the provided operation type.
      *
-     * @param string  $operationName
-     * @param integer $id
+     * @param integer|null $operationType
+     * @param integer      $id
      *
      * @return BaseCategory
      *
      * @throws NotFoundHttpException If category was not found
      */
-    private function findCategory(string $operationName, int $id): BaseCategory
+    private function findCategory(?int $operationType, int $id): BaseCategory
     {
-        $categoryClassName = $this->getClassNameByOperationName($operationName);
+        $categoryClassName = $this->getCategoryClassName($operationType);
         /** @var BaseCategoryRepository $categoryRepo */
-        $categoryRepo = $this->getDoctrine()->getRepository($categoryClassName);
+        $categoryRepo      = $this->getDoctrine()->getRepository($categoryClassName);
         /** @var BaseCategory|null $category */
-        $category = $categoryRepo->find($id);
+        $category          = $categoryRepo->find($id);
         if (!$category) {
-            throw $this->createNotFoundException(ucfirst($operationName) . ' category not found.');
+            $operationNameCamelCase = $this->operationNameFormatter->getCamelCaseByType($operationType);
+            throw $this->createNotFoundException($operationNameCamelCase . ' category not found.');
         }
 
         return $category;
     }
 
     /**
-     * Returns class name for a category depending on the operation name.
+     * Returns category class name for the provided operation type.
      *
-     * @param string $operationName
+     * @param integer|null $operationType
      *
-     * @return string
+     * @return string|null
      */
-    private function getClassNameByOperationName(string $operationName): string
+    private function getCategoryClassName(?int $operationType): ?string
     {
-        return 'App\\Entity\\Category\\' . 'Category'. ucfirst($operationName);
+        $categoryClassName      = null;
+        $operationNameCamelCase = null;
+        if ($operationType) {
+            $operationNameCamelCase = $this->operationNameFormatter->getCamelCaseByType($operationType);
+        }
+        if ($operationNameCamelCase) {
+            $categoryClassName = 'App\\Entity\\Category\\' . 'Category'. $operationNameCamelCase;
+        }
+
+        return $categoryClassName;
     }
 
     /**
-     * Returns class name for a category form type depending on the operation name.
+     * Returns class name for a category form type depending on the operation type.
      *
-     * @param string $operationName
+     * @param integer|null $operationType
      *
-     * @return string
+     * @return string|null
      */
-    private function getTypeNameByOperationName(string $operationName): string
+    private function getFormClassName(?int $operationType): ?string
     {
-        return 'App\\Form\\Category\\' . 'Category' . ucfirst($operationName) . 'Type';
+        $formClassName          = null;
+        $operationNameCamelCase = null;
+        if ($operationType) {
+            $operationNameCamelCase = $this->operationNameFormatter->getCamelCaseByType($operationType);
+        }
+        if ($operationNameCamelCase) {
+            $formClassName = 'App\\Form\\Category\\' . 'Category' . $operationNameCamelCase . 'Type';
+        }
+
+        return $formClassName;
+    }
+
+    /**
+     * Throws an exception if a category class for the operation type does not exist.
+     *
+     * @param integer|null $operationType
+     *
+     * @throws BadRequestHttpException If the provided operation type is not supported for a categories.
+     */
+    private function validateOperationType(?int $operationType): void
+    {
+        $categoryClassName = $this->getFormClassName($operationType);
+        if (!class_exists($categoryClassName)) {
+            throw new BadRequestHttpException('Unsupported operation type for a categories.');
+        }
     }
 }
