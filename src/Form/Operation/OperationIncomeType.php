@@ -20,17 +20,17 @@ class OperationIncomeType extends BaseOperationCashFlowType
         parent::buildForm($builder, $options);
 
         /** @var UserInterface $user */
-        $user          = $this->security->getUser();
+        $user         = $this->security->getUser();
         /** @var CategoryIncomeRepository $categoryRepo */
         $categoryRepo = $this->em->getRepository(CategoryIncome::class);
 
         $builder
             ->add('category', EntityType::class, [
-                'class'        => CategoryIncome::class,
-                'choices'      => $categoryRepo->findByUser($user),
-                'empty_data'   => null,
-                'placeholder'  => '---',
-                'required'     => false,
+                'class'       => CategoryIncome::class,
+                'choices'     => $categoryRepo->findByUser($user),
+                'empty_data'  => null,
+                'placeholder' => '---',
+                'required'    => false,
             ])
         ;
     }

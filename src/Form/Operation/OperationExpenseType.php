@@ -3,7 +3,6 @@
 namespace App\Form\Operation;
 
 use App\Entity\Category\CategoryExpense;
-use App\Entity\Category\CategoryIncome;
 use App\Entity\Operation\OperationExpense;
 use App\Repository\Category\CategoryIncomeRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -21,17 +20,17 @@ class OperationExpenseType extends BaseOperationCashFlowType
         parent::buildForm($builder, $options);
 
         /** @var UserInterface $user */
-        $user          = $this->security->getUser();
+        $user         = $this->security->getUser();
         /** @var CategoryIncomeRepository $categoryRepo */
         $categoryRepo = $this->em->getRepository(CategoryExpense::class);
 
         $builder
             ->add('category', EntityType::class, [
-                'class'        => CategoryIncome::class,
-                'choices'      => $categoryRepo->findByUser($user),
-                'empty_data'   => null,
-                'placeholder'  => '---',
-                'required'     => false,
+                'class'       => CategoryExpense::class,
+                'choices'     => $categoryRepo->findByUser($user),
+                'empty_data'  => null,
+                'placeholder' => '---',
+                'required'    => false,
             ])
         ;
     }

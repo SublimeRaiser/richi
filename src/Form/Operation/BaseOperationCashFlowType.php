@@ -5,41 +5,15 @@ namespace App\Form\Operation;
 use App\Entity\Account;
 use App\Entity\Fund;
 use App\Entity\Tag;
-use App\Form\DataTransformer\KopecksToRublesTransformer;
 use App\Repository\AccountRepository;
 use App\Repository\FundRepository;
 use App\Repository\TagRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 abstract class BaseOperationCashFlowType extends BaseOperationType
 {
-    /** @var Security */
-    protected $security;
-
-    /** @var EntityManagerInterface */
-    protected $em;
-
-    /**
-     * BaseOperationCashFlowType constructor.
-     *
-     * @param Security                   $security
-     * @param EntityManagerInterface     $em
-     * @param KopecksToRublesTransformer $transformer
-     */
-    public function __construct(
-        KopecksToRublesTransformer $transformer,
-        Security $security,
-        EntityManagerInterface $em
-    ) {
-        parent::__construct($transformer);
-        $this->security = $security;
-        $this->em       = $em;
-    }
-
     /**
      * {@inheritdoc}
      */

@@ -3,14 +3,14 @@
 namespace App\Form\Operation;
 
 use App\Entity\Account;
-use App\Entity\Person;
+use App\Entity\Operation\OperationTransfer;
 use App\Repository\AccountRepository;
-use App\Repository\PersonRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-abstract class BaseOperationObligationType extends BaseOperationType
+class OperationTransferType extends BaseOperationType
 {
     /**
      * {@inheritdoc}
@@ -23,21 +23,26 @@ abstract class BaseOperationObligationType extends BaseOperationType
         $user        = $this->security->getUser();
         /** @var AccountRepository $accountRepo */
         $accountRepo = $this->em->getRepository(Account::class);
-        /** @var PersonRepository $personRepo */
-        $personRepo  = $this->em->getRepository(Person::class);
 
         $builder
-            ->add('account', EntityType::class, [
-                'class'       => Account::class,
-                'choices'     => $accountRepo->findNotArchived($user),
+            ->add('source', EntityType::class, [
+                'class'   => Account::class,
+                'choices' => $accountRepo->findNotArchived($user),
             ])
-            ->add('person', EntityType::class, [
-                'class'       => Person::class,
-                'choices'     => $personRepo->findByUser($user),
-                'empty_data'  => null,
-                'placeholder' => '---',
-                'required'    => true,
+            ->add('target', EntityType::class, [
+                'class'   => Account::class,
+                'choices' => $accountRepo->findNotArchived($user),
             ])
         ;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function configureOptions(OptionsResolver $resolver): void
+    {
+        $resolver->setDefaults([
+            'data_class' => OperationTransfer::class,
+        ]);
     }
 }

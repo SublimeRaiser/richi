@@ -1,14 +1,14 @@
 <div style="float: left">
-    <a href="{{ path('operation_new', {'operationName': 'expense'}) }}">Add expense</a> |
-    <a href="{{ path('operation_new', {'operationName': 'income'}) }}">Add income</a> |
-    <a href="{{ path('operation_new', {'operationName': 'transfer'}) }}">Add transfer</a>
+    <a href="{{ path('operation_new', {'operationSlug': 'expense'}) }}">Add expense</a> |
+    <a href="{{ path('operation_new', {'operationSlug': 'income'}) }}">Add income</a> |
+    <a href="{{ path('operation_new', {'operationSlug': 'transfer'}) }}">Add transfer</a>
 </div>
 <div style="float: right">
-    <a href="{{ path('operation_new', {'operationName': 'debt'}) }}">Add debt</a> |
-    <a href="{{ path('operation_new', {'operationName': 'repayment'}) }}">Add repayment</a>
+    <a href="{{ path('operation_new', {'operationSlug': 'debt'}) }}">Add debt</a> |
+    <a href="{{ path('operation_new', {'operationSlug': 'repayment'}) }}">Add repayment</a>
 </div>
 <div style="clear: both"></div>
 <div style="float: right">
-    <a href="{{ path('operation_new', {'operationName': 'loan'}) }}">Add loan</a> |
-    <a href="{{ path('operation_new', {'operationName': 'debt-collection'}) }}">Add debt collection</a>
+    <a href="{{ path('operation_new', {'operationSlug': 'loan'}) }}">Add loan</a> |
+    <a href="{{ path('operation_new', {'operationSlug': 'debt-collection'}) }}">Add debt collection</a>
 </div>
