@@ -34,6 +34,7 @@ class AppExtension extends AbstractExtension
             new TwigFilter('currency', [$this, 'formatCurrency']),
             new TwigFilter('operation_name', [$this, 'getOperationName']),
             new TwigFilter('date_human', [$this, 'formatDateForHumans']),
+            new TwigFilter('instance_of', [$this, 'isInstanceOf']),
         ];
     }
 
@@ -99,5 +100,18 @@ class AppExtension extends AbstractExtension
         }
 
         return $formattedDate;
+    }
+
+    /**
+     * Checks whether the object is an instance of the class with provided name.
+     *
+     * @param object $obj
+     * @param string $className
+     *
+     * @return boolean
+     */
+    public function isInstanceOf(object $obj, string $className): bool
+    {
+        return $obj instanceof $className;
     }
 }

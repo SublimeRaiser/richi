@@ -30,7 +30,7 @@ class OperationIncomeType extends BaseOperationCashFlowType
                 'choices'     => $categoryRepo->findByUser($user),
                 'empty_data'  => null,
                 'placeholder' => '---',
-                'required'    => false,
+                'required'    => true,
             ])
         ;
     }

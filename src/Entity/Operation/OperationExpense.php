@@ -6,7 +6,7 @@ use App\Entity\Category\CategoryExpense;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\Operation\OperationRepository")
+ * @ORM\Entity(repositoryClass="App\Repository\Operation\OperationExpenseRepository")
  */
 class OperationExpense extends BaseOperationCashFlow
 {

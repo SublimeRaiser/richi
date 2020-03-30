@@ -6,7 +6,7 @@ use App\Entity\Account;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\Operation\OperationRepository")
+ * @ORM\Entity(repositoryClass="App\Repository\Operation\OperationTransferRepository")
  */
 class OperationTransfer extends BaseOperation
 {

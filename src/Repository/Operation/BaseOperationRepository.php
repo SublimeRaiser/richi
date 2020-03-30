@@ -16,32 +16,20 @@ use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\DBAL\Connection;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-/**
- * Class OperationRepository
- * @package App\Repository
- */
-class OperationRepository extends BaseRepository
+abstract class BaseOperationRepository extends BaseRepository
 {
-    public function __construct(ManagerRegistry $registry)
-    {
-        parent::__construct($registry, BaseOperation::class);
-    }
-
     /**
-     * Returns an operation list for the user.
+     * Returns an operation list.
      *
      * @param UserInterface $user
-     * @param string|null   $sortOrder
      *
      * @return BaseOperation[]
      */
-    public function findByUser(UserInterface $user, string $sortOrder = 'ASC'): array
+    public function findByUser(UserInterface $user): array
     {
         return $this->createQueryBuilder('o')
             ->andWhere('o.user = :user')
             ->setParameter('user', $user)
-            ->orderBy('o.date', $sortOrder)
-            ->addOrderBy('o.createdAt', $sortOrder)
             ->getQuery()
             ->getResult();
     }
@@ -153,50 +141,6 @@ SQL;
         }
 
         return $groupedInflows;
-    }
-
-    /**
-     * Return sum for all the expenses of the user.
-     *
-     * @param UserInterface $user
-     *
-     * @return integer
-     */
-    public function getUserExpenseSum(UserInterface $user): int
-    {
-        $result = $this->createQueryBuilder('o')
-            ->select('SUM(o.amount)')
-            ->andWhere('o.user = :user')
-            ->andWhere('o.type = :type')
-            ->andWhere('o.fund IS NULL')
-            ->setParameter('user', $user)
-            ->setParameter('type', OperationTypeEnum::TYPE_EXPENSE)
-            ->getQuery()
-            ->getSingleScalarResult();
-
-        return $result ?? 0;
-    }
-
-    /**
-     * Return sum for all the incomes of the user.
-     *
-     * @param UserInterface $user
-     *
-     * @return integer
-     */
-    public function getUserIncomeSum(UserInterface $user): int
-    {
-        $result = $this->createQueryBuilder('o')
-            ->select('SUM(o.amount)')
-            ->andWhere('o.user = :user')
-            ->andWhere('o.type = :type')
-            ->andWhere('o.fund IS NULL')
-            ->setParameter('user', $user)
-            ->setParameter('type', OperationTypeEnum::TYPE_INCOME)
-            ->getQuery()
-            ->getSingleScalarResult();
-
-        return $result ?? 0;
     }
 
     /**

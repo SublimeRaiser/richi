@@ -1,12 +1,20 @@
-{% if operation.type == typeIncome and operation.fund is null %}
+{% set typeIncome         = operation|instance_of('App\\Entity\\Operation\\OperationIncome') %}
+{% set typeExpense        = operation|instance_of('App\\Entity\\Operation\\OperationExpense') %}
+{% set typeTransfer       = operation|instance_of('App\\Entity\\Operation\\OperationTransfer') %}
+{% set typeDebt           = operation|instance_of('App\\Entity\\Operation\\OperationDebt') %}
+{% set typeRepayment      = operation|instance_of('App\\Entity\\Operation\\OperationRepayment') %}
+{% set typeLoan           = operation|instance_of('App\\Entity\\Operation\\OperationLoan') %}
+{% set typeDebtCollection = operation|instance_of('App\\Entity\\Operation\\OperationDebtCollection') %}
+
+{% if typeIncome and operation.fund is null %}
     {% set amountFontColor = 'green' %}
-{% elseif operation.type == typeExpense and operation.fund is null  %}
+{% elseif typeExpense and operation.fund is null  %}
     {% set amountFontColor = 'darkblue' %}
-{% elseif operation.type == typeTransfer or operation.fund is not null  %}
+{% elseif typeTransfer or operation.fund is defined and operation.fund is not null  %}
     {% set amountFontColor = 'gray' %}
-{% elseif operation.type == typeDebt %}
+{% elseif typeDebt %}
     {% set amountFontColor = 'red' %}
-{% elseif operation.type == typeLoan %}
+{% elseif typeLoan %}
     {% set amountFontColor = '#FF6103' %}
 {% else %}
     {% set amountFontColor = 'inherit' %}
@@ -17,42 +25,50 @@
         <span style="display: inline-block">
             {% if operation.description is not empty %}
                 {{ operation.description }}
-            {% elseif operation.category is not empty %}
+            {% elseif operation.category.name is defined %}
                 {{ operation.category.name|lower }}
             {% else %}
-                {{ operation.type|operation_name|lower }}
+                {% if typeTransfer %}
+                    transfer
+                {% elseif typeDebt %}
+                    debt
+                {% elseif typeRepayment %}
+                    repayment
+                {% elseif typeLoan %}
+                    loan
+                {% elseif typeDebtCollection %}
+                    debt collection
+                {% endif %}
             {% endif %}
         </span>
         <span style="float: right; color: {{ amountFontColor }};">
-            {% if operation.type == typeIncome %}         &plus; {% endif %}
-            {% if operation.type == typeExpense %}        &ndash; {% endif %}
-            {% if operation.type == typeTransfer %}       &harr; {% endif %}
-            {% if operation.type == typeDebt %}           &plus; {% endif %}
-            {% if operation.type == typeRepayment %}      &ndash; {% endif %}
-            {% if operation.type == typeLoan %}           &ndash; {% endif %}
-            {% if operation.type == typeDebtCollection %} &plus; {% endif %}
+            {% if typeIncome %}         &plus; {% endif %}
+            {% if typeExpense %}        &ndash; {% endif %}
+            {% if typeTransfer %}       &harr; {% endif %}
+            {% if typeDebt %}           &plus; {% endif %}
+            {% if typeRepayment %}      &ndash; {% endif %}
+            {% if typeLoan %}           &ndash; {% endif %}
+            {% if typeDebtCollection %} &plus; {% endif %}
             {{ operation.amount|currency }}
         </span>
     </p>
     <p class="operation-sub-line">
         <span style="float: left; font-size: small; color: gray">
-            {% if operation.category %}
+            {% if operation.category.name is defined %}
                 {{ operation.category.name }}
             {% endif %}
-            {% if operation.type == typeDebt %}           debt from {{ operation.person }}      {% endif %}
-            {% if operation.type == typeRepayment %}      debt paid to {{ operation.person }}   {% endif %}
-            {% if operation.type == typeLoan %}           loan to {{ operation.person }}        {% endif %}
-            {% if operation.type == typeDebtCollection %} loan paid from {{ operation.person }} {% endif %}
+            {% if typeDebt %}           debt from {{ operation.person }}      {% endif %}
+            {% if typeRepayment %}      debt paid to {{ operation.person }}   {% endif %}
+            {% if typeLoan %}           loan to {{ operation.person }}        {% endif %}
+            {% if typeDebtCollection %} loan paid from {{ operation.person }} {% endif %}
         </span>
         <span style="float: right; font-size: small; color: gray">
-            {% if operation.fund is not null %} [{{ operation.fund.name }}] {% endif %}
-            {% if operation.type == typeIncome %}         {{ operation.target }}                          {% endif %}
-            {% if operation.type == typeExpense %}        {{ operation.source }}                          {% endif %}
-            {% if operation.type == typeTransfer %}       {{ operation.source }} > {{ operation.target }} {% endif %}
-            {% if operation.type == typeDebt %}           {{ operation.target }}                          {% endif %}
-            {% if operation.type == typeRepayment %}      {{ operation.source }}                          {% endif %}
-            {% if operation.type == typeLoan %}           {{ operation.source }}                          {% endif %}
-            {% if operation.type == typeDebtCollection %} {{ operation.target }}                          {% endif %}
+            {% if operation.fund.name is defined %} [{{ operation.fund.name }}] {% endif %}
+            {% if typeTransfer %}
+                {{ operation.source }} > {{ operation.target }}
+            {% else %}
+                {{ operation.account }}
+            {% endif %}
         </span>
         <span style="display: block; clear: both"></span>
     </p>
