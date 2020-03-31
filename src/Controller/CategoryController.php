@@ -20,9 +20,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
- * Class CategoryController
- * @package App\Controller
- *
  * @Route("/category")
  */
 class CategoryController extends AbstractController

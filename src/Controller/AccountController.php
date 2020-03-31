@@ -13,9 +13,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
- * Class AccountController
- * @package App\Controller
- *
  * @Route("/account")
  */
 class AccountController extends AbstractController

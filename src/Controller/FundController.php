@@ -13,9 +13,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
- * Class FundController
- * @package App\Controller
- *
  * @Route("/fund")
  */
 class FundController extends AbstractController

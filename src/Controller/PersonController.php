@@ -13,9 +13,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
- * Class PersonController
- * @package App\Controller
- *
  * @Route("/person")
  */
 class PersonController extends AbstractController
