@@ -1,0 +1,8 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Copy {{ operationName }}{% endblock %}
+
+{% block body %}
+    <h1>Copy {{ operationName }}:</h1>
+    {% include('operation/_form_' ~ operationSlug ~ '.html.twig') %}
+{% endblock %}

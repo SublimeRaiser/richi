@@ -2,12 +2,10 @@
 
 namespace App\Controller;
 
-use App\Entity\Category\BaseCategory;
 use App\Entity\Operation\BaseOperation;
 use App\Entity\Operation\OperationExpense;
 use App\Entity\Operation\OperationIncome;
-use App\Enum\OperationTypeEnum;
-use App\Repository\Operation\BaseOperationRepository;
+use App\Repository\Category\BaseCategoryRepository;
 use App\Repository\Operation\OperationExpenseRepository;
 use App\Repository\Operation\OperationIncomeRepository;
 use App\Service\OperationList;
@@ -85,7 +83,7 @@ class OperationController extends AbstractController
     }
 
     /**
-     * @Route("/new/{operationSlug}", name="operation_new", methods={"GET", "POST"})
+     * @Route("/{operationSlug}/new", name="operation_new", methods={"GET", "POST"})
      *
      * @param string  $operationSlug
      * @param Request $request
@@ -129,24 +127,31 @@ class OperationController extends AbstractController
     }
 
     /**
-     * @Route("/copy/{id}", name="operation_copy", methods={"GET", "POST"})
+     * @Route("/{operationSlug}/copy/{id}", name="operation_copy", methods={"GET", "POST"})
      *
-     * @param OperationIncome $operation
-     * @param Request   $request
+     * @param string  $operationSlug
+     * @param integer $id
+     * @param Request $request
      *
      * @return Response
      */
-    public function copy(OperationIncome $operation, Request $request): Response
+    public function copy(string $operationSlug, int $id, Request $request): Response
     {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
+        $operationType = $this->operationNameFormatter->getTypeBySlug($operationSlug);
+        $this->validateOperationType($operationType);
+
+        /** @var BaseOperation $operation */
+        $operation = $this->findOperation($operationType, $id);
         $this->denyAccessUnlessGranted('OPERATION_COPY', $operation);
 
         $clonedOperation = clone $operation;
-        $form            = $this->createForm(OperationType::class, $clonedOperation, [
-            'operation_type' => $clonedOperation->getType(),
-        ]);
+        $formClassName   = $this->getFormClassName($operationType);
+        $form            = $this->createForm($formClassName, $clonedOperation);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            /** @var OperationIncome $clonedOperation */
+            /** @var BaseOperation $clonedOperation */
             $clonedOperation = $form->getData();
 
             $this->em->persist($clonedOperation);
@@ -155,31 +160,38 @@ class OperationController extends AbstractController
             return $this->redirectToRoute('operation_index');
         }
 
-        $operationType = $clonedOperation->getType();
-
-        return $this->render('operation/copy_'.OperationTypeEnum::getTypeSlug($operationType).'.html.twig', [
+        return $this->render('operation/copy.html.twig', [
             'operationForm' => $form->createView(),
+            'operationName' => $this->operationNameFormatter->getNameBySlug($operationSlug),
+            'operationSlug' => $operationSlug,
         ]);
     }
 
     /**
-     * @Route("/edit/{id}", name="operation_edit", methods={"GET", "POST"})
+     * @Route("/{operationSlug}/edit/{id}", name="operation_edit", methods={"GET", "POST"})
      *
-     * @param OperationIncome $operation
-     * @param Request   $request
+     * @param string  $operationSlug
+     * @param integer $id
+     * @param Request $request
      *
      * @return Response
      */
-    public function edit(OperationIncome $operation, Request $request): Response
+    public function edit(string $operationSlug, int $id, Request $request): Response
     {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
+        $operationType = $this->operationNameFormatter->getTypeBySlug($operationSlug);
+        $this->validateOperationType($operationType);
+
+        /** @var BaseOperation $operation */
+        $operation = $this->findOperation($operationType, $id);
         $this->denyAccessUnlessGranted('OPERATION_EDIT', $operation);
 
-        $form = $this->createForm(OperationType::class, $operation, [
-            'operation_type' => $operation->getType(),
-        ]);
+        $formClassName = $this->getFormClassName($operationType);
+        $form          = $this->createForm($formClassName, $operation);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            /** @var OperationIncome $operation */
+            /** @var BaseOperation $operation */
             $operation = $form->getData();
 
             $this->em->persist($operation);
@@ -188,22 +200,30 @@ class OperationController extends AbstractController
             return $this->redirectToRoute('operation_index');
         }
 
-        $operationType = $operation->getType();
-
-        return $this->render('operation/edit_'.OperationTypeEnum::getTypeSlug($operationType).'.html.twig', [
+        return $this->render('operation/edit.html.twig', [
             'operationForm' => $form->createView(),
+            'operationName' => $this->operationNameFormatter->getNameBySlug($operationSlug),
+            'operationSlug' => $operationSlug,
         ]);
     }
 
     /**
-     * @Route("/{id}", name="operation_delete", methods={"DELETE"})
+     * @Route("/{operationSlug}/{id}", name="operation_delete", methods={"DELETE"})
      *
-     * @param OperationIncome $operation
+     * @param string  $operationSlug
+     * @param integer $id
      *
      * @return Response
      */
-    public function delete(OperationIncome $operation): Response
+    public function delete(string $operationSlug, int $id): Response
     {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
+        $operationType = $this->operationNameFormatter->getTypeBySlug($operationSlug);
+        $this->validateOperationType($operationType);
+
+        /** @var BaseOperation $operation */
+        $operation = $this->findOperation($operationType, $id);
         $this->denyAccessUnlessGranted('OPERATION_DELETE', $operation);
 
         $this->em->remove($operation);
@@ -215,27 +235,30 @@ class OperationController extends AbstractController
     }
 
     /**
-     * Returns operation with the given ID for provided operation name.
+     * Returns operation with the given ID for provided operation type.
      *
-     * @param string  $operationName
-     * @param integer $id
+     * @param integer|null $operationType
+     * @param integer      $id
      *
      * @return BaseOperation
      *
-     * @throws NotFoundHttpException If category was not found
+     * @throws NotFoundHttpException If operation was not found.
      */
-    private function findOperation(string $operationName, int $id): BaseOperation
+    private function findOperation(?int $operationType, int $id): BaseOperation
     {
-        $operationClassName = $this->getOperationClassName($operationName);
-        /** @var BaseOperationRepository $operationRepo */
-        $operationRepo = $this->getDoctrine()->getRepository($operationClassName);
-        /** @var BaseCategory|null $category */
-        $category = $operationRepo->find($id);
-        if (!$category) {
-            throw $this->createNotFoundException(ucfirst($operationName) . ' category not found.');
+        $operationClassName = $this->getOperationClassName($operationType);
+        /** @var BaseCategoryRepository $operationRepo */
+        $operationRepo      = $this->em->getRepository($operationClassName);
+        /** @var BaseOperation|null $operation */
+        $operation          = $operationRepo->find($id);
+        if (!$operation) {
+            $operationNameCamelCase = $this->operationNameFormatter->getCamelCaseByType($operationType);
+            throw $this->createNotFoundException(
+                sprintf('%s operation with ID %d not found.', $operationNameCamelCase, $id)
+            );
         }
 
-        return $category;
+        return $operation;
     }
 
     /**
