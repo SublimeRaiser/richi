@@ -2,7 +2,6 @@
 
 namespace App\Entity\Operation;
 
-use App\Entity\Account;
 use App\Entity\Fund;
 use App\Entity\Tag;
 use Doctrine\ORM\Mapping as ORM;
@@ -12,13 +11,6 @@ use Doctrine\ORM\Mapping as ORM;
  */
 abstract class BaseOperationCashFlow extends BaseOperation
 {
-    /**
-     * @var Account
-     *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Account")
-     */
-    protected $account;
-
     /**
      * @var Tag|null
      *
@@ -32,26 +24,6 @@ abstract class BaseOperationCashFlow extends BaseOperation
      * @ORM\ManyToOne(targetEntity="App\Entity\Fund")
      */
     protected $fund;
-
-    /**
-     * @return Account|null
-     */
-    public function getAccount(): ?Account
-    {
-        return $this->account;
-    }
-
-    /**
-     * @param Account $account
-     *
-     * @return self
-     */
-    public function setAccount(Account $account): self
-    {
-        $this->account = $account;
-
-        return $this;
-    }
 
     /**
      * @return Tag|null

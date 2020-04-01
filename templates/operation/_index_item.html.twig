@@ -60,11 +60,13 @@
         </span>
         <span style="float: right; font-size: small; color: gray">
             {% if operation.fund.name is defined %} [{{ operation.fund.name }}] {% endif %}
-            {% if typeTransfer %}
-                {{ operation.source }} > {{ operation.target }}
-            {% else %}
-                {{ operation.account }}
-            {% endif %}
+            {% if typeIncome %}         {{ operation.target }}                          {% endif %}
+            {% if typeExpense %}        {{ operation.source }}                          {% endif %}
+            {% if typeTransfer %}       {{ operation.source }} > {{ operation.target }} {% endif %}
+            {% if typeDebt %}           {{ operation.target }}                          {% endif %}
+            {% if typeRepayment %}      {{ operation.source }}                          {% endif %}
+            {% if typeLoan %}           {{ operation.source }}                          {% endif %}
+            {% if typeDebtCollection %} {{ operation.target }}                          {% endif %}
         </span>
         <span style="display: block; clear: both"></span>
     </p>

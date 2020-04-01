@@ -2,6 +2,7 @@
 
 namespace App\Entity\Operation;
 
+use App\Entity\Account;
 use App\Entity\Category\CategoryExpense;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -11,11 +12,38 @@ use Doctrine\ORM\Mapping as ORM;
 class OperationExpense extends BaseOperationCashFlow
 {
     /**
+     * @var Account|null
+     *
+     * @ORM\ManyToOne(targetEntity="App\Entity\Account")
+     */
+    private $source;
+
+    /**
      * @var CategoryExpense
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\Category\CategoryExpense")
      */
-    protected $category;
+    private $category;
+
+    /**
+     * @return Account|null
+     */
+    public function getSource(): ?Account
+    {
+        return $this->source;
+    }
+
+    /**
+     * @param Account|null $account
+     *
+     * @return self
+     */
+    public function setSource(?Account $account): self
+    {
+        $this->source = $account;
+
+        return $this;
+    }
 
     /**
      * @return CategoryExpense|null
@@ -28,7 +56,7 @@ class OperationExpense extends BaseOperationCashFlow
     /**
      * @param CategoryExpense $category
      *
-     * @return OperationExpense
+     * @return self
      */
     public function setCategory(CategoryExpense $category): self
     {

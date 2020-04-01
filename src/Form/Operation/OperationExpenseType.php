@@ -2,8 +2,10 @@
 
 namespace App\Form\Operation;
 
+use App\Entity\Account;
 use App\Entity\Category\CategoryExpense;
 use App\Entity\Operation\OperationExpense;
+use App\Repository\AccountRepository;
 use App\Repository\Category\CategoryIncomeRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -21,10 +23,16 @@ class OperationExpenseType extends BaseOperationCashFlowType
 
         /** @var UserInterface $user */
         $user         = $this->security->getUser();
+        /** @var AccountRepository $accountRepo */
+        $accountRepo  = $this->em->getRepository(Account::class);
         /** @var CategoryIncomeRepository $categoryRepo */
         $categoryRepo = $this->em->getRepository(CategoryExpense::class);
 
         $builder
+            ->add('source', EntityType::class, [
+                'class'       => Account::class,
+                'choices'     => $accountRepo->findNotArchived($user),
+            ])
             ->add('category', EntityType::class, [
                 'class'       => CategoryExpense::class,
                 'choices'     => $categoryRepo->findByUser($user),

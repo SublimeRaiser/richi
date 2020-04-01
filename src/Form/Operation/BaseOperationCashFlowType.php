@@ -2,10 +2,8 @@
 
 namespace App\Form\Operation;
 
-use App\Entity\Account;
 use App\Entity\Fund;
 use App\Entity\Tag;
-use App\Repository\AccountRepository;
 use App\Repository\FundRepository;
 use App\Repository\TagRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -22,19 +20,13 @@ abstract class BaseOperationCashFlowType extends BaseOperationType
         parent::buildForm($builder, $options);
 
         /** @var UserInterface $user */
-        $user        = $this->security->getUser();
-        /** @var AccountRepository $accountRepo */
-        $accountRepo = $this->em->getRepository(Account::class);
+        $user     = $this->security->getUser();
         /** @var TagRepository $tagRepo */
-        $tagRepo     = $this->em->getRepository(Tag::class);
+        $tagRepo  = $this->em->getRepository(Tag::class);
         /** @var FundRepository $fundRepo */
-        $fundRepo    = $this->em->getRepository(Fund::class);
+        $fundRepo = $this->em->getRepository(Fund::class);
 
         $builder
-            ->add('account', EntityType::class, [
-                'class'       => Account::class,
-                'choices'     => $accountRepo->findNotArchived($user),
-            ])
             ->add('tag', EntityType::class, [
                 'class'       => Tag::class,
                 'choices'     => $tagRepo->findByUser($user),
