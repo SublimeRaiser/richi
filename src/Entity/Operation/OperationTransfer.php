@@ -35,7 +35,7 @@ class OperationTransfer extends BaseOperation
     /**
      * @param Account|null $account
      *
-     * @return OperationTransfer
+     * @return self
      */
     public function setSource(?Account $account): self
     {
@@ -55,7 +55,7 @@ class OperationTransfer extends BaseOperation
     /**
      * @param Account|null $account
      *
-     * @return OperationTransfer
+     * @return self
      */
     public function setTarget(?Account $account): self
     {

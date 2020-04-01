@@ -2,7 +2,10 @@
 
 namespace App\Entity\Operation;
 
+use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
@@ -31,7 +34,7 @@ abstract class BaseOperation
     protected $user;
 
     /**
-     * @var \DateTimeInterface
+     * @var DateTimeInterface
      *
      * @ORM\Column(name="`date`", type="date")
      */
@@ -52,37 +55,37 @@ abstract class BaseOperation
     protected $description;
 
     /**
-     * @var \DateTimeInterface
+     * @var DateTimeInterface
      *
      * @ORM\Column(type="datetime")
      */
     protected $createdAt;
 
     /**
-     * @var \DateTimeInterface
+     * @var DateTimeInterface
      *
      * @ORM\Column(type="datetime")
      */
     protected $updatedAt;
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function __construct()
     {
-        $now             = new \DateTime();
+        $now             = new DateTime();
         $this->date      = $now;
         $this->createdAt = $now;
         $this->updatedAt = $now;
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function __clone()
     {
         if ($this->id) {
-            $now             = new \DateTime();
+            $now             = new DateTime();
             $this->createdAt = $now;
             $this->updatedAt = $now;
         }
@@ -107,7 +110,7 @@ abstract class BaseOperation
     /**
      * @param UserInterface|null $user
      *
-     * @return BaseOperation
+     * @return self
      */
     public function setUser(?UserInterface $user): self
     {
@@ -117,19 +120,19 @@ abstract class BaseOperation
     }
 
     /**
-     * @return \DateTimeInterface|null
+     * @return DateTimeInterface|null
      */
-    public function getDate(): ?\DateTimeInterface
+    public function getDate(): ?DateTimeInterface
     {
         return $this->date;
     }
 
     /**
-     * @param \DateTimeInterface $date
+     * @param DateTimeInterface $date
      *
-     * @return BaseOperation
+     * @return self
      */
-    public function setDate(\DateTimeInterface $date): self
+    public function setDate(DateTimeInterface $date): self
     {
         $this->date = $date;
 
@@ -147,7 +150,7 @@ abstract class BaseOperation
     /**
      * @param integer $amount
      *
-     * @return BaseOperation
+     * @return self
      */
     public function setAmount(int $amount): self
     {
@@ -167,7 +170,7 @@ abstract class BaseOperation
     /**
      * @param string|null $description
      *
-     * @return BaseOperation
+     * @return self
      */
     public function setDescription(?string $description): self
     {
@@ -177,17 +180,17 @@ abstract class BaseOperation
     }
 
     /**
-     * @return \DateTimeInterface|null
+     * @return DateTimeInterface|null
      */
-    public function getCreatedAt(): ?\DateTimeInterface
+    public function getCreatedAt(): ?DateTimeInterface
     {
         return $this->createdAt;
     }
 
     /**
-     * @return \DateTimeInterface|null
+     * @return DateTimeInterface|null
      */
-    public function getUpdatedAt(): ?\DateTimeInterface
+    public function getUpdatedAt(): ?DateTimeInterface
     {
         return $this->updatedAt;
     }
@@ -196,10 +199,12 @@ abstract class BaseOperation
      * @ORM\PreUpdate()
      *
      * @return void
+     *
+     * @throws Exception
      */
     public function setUpdatedAtValue(): void
     {
-        $this->updatedAt = new \DateTime();
+        $this->updatedAt = new DateTime();
     }
 
     /**

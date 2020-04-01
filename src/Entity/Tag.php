@@ -2,6 +2,9 @@
 
 namespace App\Entity;
 
+use DateTime;
+use DateTimeInterface;
+use Exception;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -55,14 +58,14 @@ class Tag
     private $description;
 
     /**
-     * @var \DateTimeInterface
+     * @var DateTimeInterface
      *
      * @ORM\Column(type="datetime")
      */
     private $createdAt;
 
     /**
-     * @var \DateTimeInterface
+     * @var DateTimeInterface
      *
      * @ORM\Column(type="datetime")
      */
@@ -73,7 +76,7 @@ class Tag
      */
     public function __construct()
     {
-        $now             = new \DateTime();
+        $now             = new DateTime();
         $this->createdAt = $now;
         $this->updatedAt = $now;
     }
@@ -105,7 +108,7 @@ class Tag
     /**
      * @param UserInterface|null $user
      *
-     * @return Tag
+     * @return self
      */
     public function setUser(?UserInterface $user): self
     {
@@ -125,7 +128,7 @@ class Tag
     /**
      * @param string $name
      *
-     * @return Tag
+     * @return self
      */
     public function setName(string $name): self
     {
@@ -145,7 +148,7 @@ class Tag
     /**
      * @param string|null $description
      *
-     * @return Tag
+     * @return self
      */
     public function setDescription(?string $description): self
     {
@@ -155,17 +158,17 @@ class Tag
     }
 
     /**
-     * @return \DateTimeInterface|null
+     * @return DateTimeInterface|null
      */
-    public function getCreatedAt(): ?\DateTimeInterface
+    public function getCreatedAt(): ?DateTimeInterface
     {
         return $this->createdAt;
     }
 
     /**
-     * @return \DateTimeInterface|null
+     * @return DateTimeInterface|null
      */
-    public function getUpdatedAt(): ?\DateTimeInterface
+    public function getUpdatedAt(): ?DateTimeInterface
     {
         return $this->updatedAt;
     }
@@ -174,9 +177,11 @@ class Tag
      * @ORM\PreUpdate()
      *
      * @return void
+     *
+     * @throws Exception
      */
     public function setUpdatedAtValue(): void
     {
-        $this->updatedAt = new \DateTime();
+        $this->updatedAt = new DateTime();
     }
 }

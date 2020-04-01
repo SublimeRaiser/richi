@@ -2,6 +2,9 @@
 
 namespace App\Entity;
 
+use DateTime;
+use DateTimeInterface;
+use Exception;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -77,7 +80,7 @@ class User implements UserInterface
     private $funds;
 
     /**
-     * @var \DateTimeInterface
+     * @var DateTimeInterface
      *
      * @ORM\Column(type="datetime")
      */
@@ -91,7 +94,7 @@ class User implements UserInterface
     /**
      * User constructor.
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function __construct()
     {
@@ -100,7 +103,7 @@ class User implements UserInterface
         $this->tags       = new ArrayCollection();
         $this->funds      = new ArrayCollection();
 
-        $now              = new \DateTime();
+        $now              = new DateTime();
         $this->createdAt  = $now;
         $this->updatedAt  = $now;
     }
@@ -124,7 +127,7 @@ class User implements UserInterface
     /**
      * @param string $email
      *
-     * @return User
+     * @return self
      */
     public function setEmail(string $email): self
     {
@@ -162,7 +165,7 @@ class User implements UserInterface
     /**
      * @param array $roles
      *
-     * @return User
+     * @return self
      */
     public function setRoles(array $roles): self
     {
@@ -184,7 +187,7 @@ class User implements UserInterface
     /**
      * @param string $password
      *
-     * @return User
+     * @return self
      */
     public function setPassword(string $password): self
     {
@@ -225,7 +228,7 @@ class User implements UserInterface
     /**
      * @param Account $account
      *
-     * @return User
+     * @return self
      */
     public function addAccount(Account $account): self
     {
@@ -240,7 +243,7 @@ class User implements UserInterface
     /**
      * @param Account $account
      *
-     * @return User
+     * @return self
      */
     public function removeAccount(Account $account): self
     {
@@ -266,7 +269,7 @@ class User implements UserInterface
     /**
      * @param Person $person
      *
-     * @return User
+     * @return self
      */
     public function addPerson(Person $person): self
     {
@@ -281,7 +284,7 @@ class User implements UserInterface
     /**
      * @param Person $person
      *
-     * @return User
+     * @return self
      */
     public function removePerson(Person $person): self
     {
@@ -307,7 +310,7 @@ class User implements UserInterface
     /**
      * @param Tag $tag
      *
-     * @return User
+     * @return self
      */
     public function addTag(Tag $tag): self
     {
@@ -322,7 +325,7 @@ class User implements UserInterface
     /**
      * @param Tag $tag
      *
-     * @return User
+     * @return self
      */
     public function removeTag(Tag $tag): self
     {
@@ -348,7 +351,7 @@ class User implements UserInterface
     /**
      * @param Fund $fund
      *
-     * @return User
+     * @return self
      */
     public function addFund(Fund $fund): self
     {
@@ -363,7 +366,7 @@ class User implements UserInterface
     /**
      * @param Fund $fund
      *
-     * @return User
+     * @return self
      */
     public function removeFund(Fund $fund): self
     {
@@ -379,17 +382,17 @@ class User implements UserInterface
     }
 
     /**
-     * @return \DateTimeInterface|null
+     * @return DateTimeInterface|null
      */
-    public function getCreatedAt(): ?\DateTimeInterface
+    public function getCreatedAt(): ?DateTimeInterface
     {
         return $this->createdAt;
     }
 
     /**
-     * @return \DateTimeInterface|null
+     * @return DateTimeInterface|null
      */
-    public function getUpdatedAt(): ?\DateTimeInterface
+    public function getUpdatedAt(): ?DateTimeInterface
     {
         return $this->updatedAt;
     }
@@ -398,9 +401,11 @@ class User implements UserInterface
      * @ORM\PreUpdate
      *
      * @return void
+     * 
+     * @throws Exception
      */
     public function setUpdatedAtValue(): void
     {
-        $this->updatedAt = new \DateTime();
+        $this->updatedAt = new DateTime();
     }
 }
