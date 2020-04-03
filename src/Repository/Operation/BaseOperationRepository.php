@@ -12,7 +12,6 @@ use App\Repository\BaseRepository;
 use App\ValueObject\AccountCash;
 use App\ValueObject\FundCash;
 use App\ValueObject\PersonObligation;
-use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\DBAL\Connection;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -35,73 +34,63 @@ abstract class BaseOperationRepository extends BaseRepository
     }
 
     /**
-     * Calculates the sum of all the inflows for the accounts provided.
-     *
-     * @param Account[] $accounts
-     *
-     * @return AccountCash[]
-     *
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     */
-    public function getAccountInflowSums(array $accounts): array
-    {
-        $groupedInflows = [];
-
-        $connection = $this->getEntityManager()->getConnection();
-        $sql = <<< 'SQL'
-SELECT target_id as account_id,
-       SUM(amount) as sum
-FROM operation
-WHERE target_id IN (?)
-GROUP BY target_id
-SQL;
-
-        $accountIds = $this->getIds($accounts);
-        $stmt       = $connection->executeQuery($sql, [$accountIds], [Connection::PARAM_INT_ARRAY]);
-        foreach ($stmt->fetchAll() as $accountInflow) {
-            $accountId        = $accountInflow['account_id'];
-            $sum              = $accountInflow['sum'];
-            $account          = $accounts[$accountId];
-            $groupedInflows[] = new AccountCash($account, $sum);
-        }
-
-        return $groupedInflows;
-    }
-
-    /**
      * Calculates the sum of all the outflows for the accounts provided.
      *
      * @param Account[] $accounts
      *
      * @return AccountCash[]
-     *
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function getAccountOutflowSums(array $accounts): array
+    public function getOutflowSums(array $accounts): array
     {
         $groupedOutflows = [];
 
-        $connection = $this->getEntityManager()->getConnection();
-        $sql = <<< 'SQL'
-SELECT source_id as account_id,
-       SUM(amount) as sum
-FROM operation
-WHERE source_id IN (?)
-GROUP BY source_id
-SQL;
+        $result = $this->createQueryBuilder('o')
+            ->select('s.id as source_id, SUM(o.amount) as sum')
+            ->leftJoin('o.source', 's')
+            ->andWhere('o.source in (:accounts)')
+            ->setParameter('accounts', $accounts)
+            ->groupBy('o.source')
+            ->getQuery()
+            ->getResult();
 
-        $accountIds = $this->getIds($accounts);
-        $stmt       = $connection->executeQuery($sql, [$accountIds], [Connection::PARAM_INT_ARRAY]);
-        foreach ($stmt->fetchAll() as $accountOutflow) {
-            $accountId         = $accountOutflow['account_id'];
+        foreach ($result as $accountOutflow) {
+            $sourceId          = $accountOutflow['source_id'];
             $sum               = $accountOutflow['sum'];
-            $account           = $accounts[$accountId];
+            $account           = $accounts[$sourceId];
             $groupedOutflows[] = new AccountCash($account, $sum);
         }
 
         return $groupedOutflows;
+    }
+
+    /**
+     * Calculates the sum of all the inflows for the accounts provided.
+     *
+     * @param Account[] $accounts
+     *
+     * @return AccountCash[]
+     */
+    public function getInflowSums(array $accounts): array
+    {
+        $groupedInflows = [];
+
+        $result = $this->createQueryBuilder('o')
+            ->select('t.id as target_id, SUM(o.amount) as sum')
+            ->leftJoin('o.target', 't')
+            ->andWhere('o.target in (:accounts)')
+            ->setParameter('accounts', $accounts)
+            ->groupBy('o.target')
+            ->getQuery()
+            ->getResult();
+
+        foreach ($result as $accountInflow) {
+            $targetId         = $accountInflow['target_id'];
+            $sum              = $accountInflow['sum'];
+            $account          = $accounts[$targetId];
+            $groupedInflows[] = new AccountCash($account, $sum);
+        }
+
+        return $groupedInflows;
     }
 
     /**
@@ -185,7 +174,7 @@ SQL;
      *
      * @return integer[]
      */
-    private function getIds(array $entities): array
+    protected function getIds(array $entities): array
     {
         $ids = [];
 

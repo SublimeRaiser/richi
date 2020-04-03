@@ -5,33 +5,32 @@ namespace App\Service;
 
 use App\Entity\Account;
 use App\Entity\Fund;
-use App\Entity\BaseOperation;
+use App\Entity\Operation\OperationDebt;
+use App\Entity\Operation\OperationDebtCollection;
+use App\Entity\Operation\OperationExpense;
+use App\Entity\Operation\OperationIncome;
+use App\Entity\Operation\OperationLoan;
+use App\Entity\Operation\OperationRepayment;
+use App\Entity\Operation\OperationTransfer;
 use App\Enum\OperationTypeEnum;
 use App\Repository\AccountRepository;
 use App\Repository\FundRepository;
-use App\Repository\OperationRepository;
+use App\Repository\Operation\OperationDebtCollectionRepository;
+use App\Repository\Operation\OperationDebtRepository;
+use App\Repository\Operation\OperationExpenseRepository;
+use App\Repository\Operation\OperationIncomeRepository;
+use App\Repository\Operation\OperationLoanRepository;
+use App\Repository\Operation\OperationRepaymentRepository;
+use App\Repository\Operation\OperationTransferRepository;
 use App\ValueObject\AccountCash;
 use App\ValueObject\FundCash;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-/**
- * Class BalanceMonitor
- * @package App\Service
- */
 class BalanceMonitor
 {
     /** @var EntityManagerInterface */
     private $em;
-
-    /** @var OperationRepository */
-    private $operationRepo;
-
-    /** @var AccountRepository */
-    private $accountRepo;
-
-    /** @var FundRepository */
-    private $fundRepo;
 
     /**
      * BalanceMonitor constructor.
@@ -40,10 +39,7 @@ class BalanceMonitor
      */
     public function __construct(EntityManagerInterface $em)
     {
-        $this->em            = $em;
-        $this->operationRepo = $em->getRepository(BaseOperation::class);
-        $this->accountRepo   = $em->getRepository(Account::class);
-        $this->fundRepo      = $em->getRepository(Fund::class);
+        $this->em = $em;
     }
 
     /**
@@ -57,15 +53,18 @@ class BalanceMonitor
     {
         $accountBalances = [];
 
-        $accounts    = $this->accountRepo->findByUser($user);
-        $inflowSums  = $this->operationRepo->getAccountInflowSums($accounts);
-        $outflowSums = $this->operationRepo->getAccountOutflowSums($accounts);
+        /** @var AccountRepository $accountRepo */
+        $accountRepo = $this->em->getRepository(Account::class);
+        $accounts    = $accountRepo->findByUser($user);
+        $inflowSums  = $this->getInflowSums($accounts);
+        $outflowSums = $this->getOutflowSums($accounts);
 
         foreach ($accounts as $account) {
             // Consider initial balance
             $accountBalance = new AccountCash($account, $account->getInitialBalance());
 
             // Consider inflows
+            /** @var AccountCash $inflowSum */
             foreach ($inflowSums as $inflowSum) {
                 if ($inflowSum->getAccount() !== $account) {
                     continue;
@@ -75,6 +74,7 @@ class BalanceMonitor
             }
 
             // Consider outflows
+            /** @var AccountCash $outflowSum */
             foreach ($outflowSums as $outflowSum) {
                 if ($outflowSum->getAccount() !== $account) {
                     continue;
@@ -116,7 +116,9 @@ class BalanceMonitor
     {
         $fundBalances = [];
 
-        $funds       = $this->fundRepo->findByUser($user);
+        /** @var FundRepository $fundRepo */
+        $fundRepo    = $this->em->getRepository(Fund::class);
+        $funds       = $fundRepo->findByUser($user);
         $incomeSums  = $this->operationRepo->getFundCashFlowSums($funds, OperationTypeEnum::TYPE_INCOME);
         $expenseSums = $this->operationRepo->getFundCashFlowSums($funds, OperationTypeEnum::TYPE_EXPENSE);
 
@@ -162,5 +164,57 @@ class BalanceMonitor
         }
 
         return $total;
+    }
+
+    /**
+     * Returns an array with inflow sums for the provided accounts.
+     *
+     * @param Account[] $accounts
+     *
+     * @return AccountCash[]
+     */
+    private function getInflowSums(array $accounts): array
+    {
+        /** @var OperationIncomeRepository $operationIncomeRepo */
+        $operationIncomeRepo         = $this->em->getRepository(OperationIncome::class);
+        /** @var OperationTransferRepository $operationTransferRepo */
+        $operationTransferRepo       = $this->em->getRepository(OperationTransfer::class);
+        /** @var OperationDebtRepository $operationDebtRepo */
+        $operationDebtRepo           = $this->em->getRepository(OperationDebt::class);
+        /** @var OperationDebtCollectionRepository $operationDebtCollectionRepo */
+        $operationDebtCollectionRepo = $this->em->getRepository(OperationDebtCollection::class);
+
+        $inflowIncomeSums         = $operationIncomeRepo->getInflowSums($accounts);
+        $inflowTransferSums       = $operationTransferRepo->getInflowSums($accounts);
+        $inflowDebtSums           = $operationDebtRepo->getInflowSums($accounts);
+        $inflowDebtCollectionSums = $operationDebtCollectionRepo->getInflowSums($accounts);
+
+        return array_merge($inflowIncomeSums, $inflowTransferSums, $inflowDebtSums, $inflowDebtCollectionSums);
+    }
+
+    /**
+     * Returns an array with outflow sums for the provided accounts.
+     *
+     * @param Account[] $accounts
+     *
+     * @return AccountCash[]
+     */
+    private function getOutflowSums(array $accounts): array
+    {
+        /** @var OperationExpenseRepository $operationExpenseRepo */
+        $operationExpenseRepo   = $this->em->getRepository(OperationExpense::class);
+        /** @var OperationTransferRepository $operationTransferRepo */
+        $operationTransferRepo  = $this->em->getRepository(OperationTransfer::class);
+        /** @var OperationLoanRepository $operationLoanRepo */
+        $operationLoanRepo      = $this->em->getRepository(OperationLoan::class);
+        /** @var OperationRepaymentRepository $operationRepaymentRepo */
+        $operationRepaymentRepo = $this->em->getRepository(OperationRepayment::class);
+
+        $outflowExpenseSums   = $operationExpenseRepo->getOutflowSums($accounts);
+        $outflowTransferSums  = $operationTransferRepo->getOutflowSums($accounts);
+        $outflowLoanSums      = $operationLoanRepo->getOutflowSums($accounts);
+        $outflowRepaymentSums = $operationRepaymentRepo->getOutflowSums($accounts);
+
+        return array_merge($outflowExpenseSums, $outflowTransferSums, $outflowLoanSums, $outflowRepaymentSums);
     }
 }
