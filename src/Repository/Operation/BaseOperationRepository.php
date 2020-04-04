@@ -3,14 +3,11 @@
 namespace App\Repository\Operation;
 
 use App\Entity\Account;
-use App\Entity\Fund;
 use App\Entity\Identifiable;
 use App\Entity\Operation\BaseOperation;
 use App\Entity\Person;
-use App\Enum\OperationTypeEnum;
 use App\Repository\BaseRepository;
 use App\ValueObject\AccountCash;
-use App\ValueObject\FundCash;
 use App\ValueObject\PersonObligation;
 use Doctrine\DBAL\Connection;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -34,47 +31,17 @@ abstract class BaseOperationRepository extends BaseRepository
     }
 
     /**
-     * Calculates the sum of all the outflows for the accounts provided.
-     *
-     * @param Account[] $accounts
-     *
-     * @return AccountCash[]
-     */
-    public function getOutflowSums(array $accounts): array
-    {
-        $groupedOutflows = [];
-
-        $result = $this->createQueryBuilder('o')
-            ->select('s.id as source_id, SUM(o.amount) as sum')
-            ->leftJoin('o.source', 's')
-            ->andWhere('o.source in (:accounts)')
-            ->setParameter('accounts', $accounts)
-            ->groupBy('o.source')
-            ->getQuery()
-            ->getResult();
-
-        foreach ($result as $accountOutflow) {
-            $sourceId          = $accountOutflow['source_id'];
-            $sum               = $accountOutflow['sum'];
-            $account           = $accounts[$sourceId];
-            $groupedOutflows[] = new AccountCash($account, $sum);
-        }
-
-        return $groupedOutflows;
-    }
-
-    /**
      * Calculates the sum of all the inflows for the accounts provided.
      *
      * @param Account[] $accounts
      *
      * @return AccountCash[]
      */
-    public function getInflowSums(array $accounts): array
+    public function getAccountInflowSums(array $accounts): array
     {
         $groupedInflows = [];
 
-        $result = $this->createQueryBuilder('o')
+        $accountInflowSums = $this->createQueryBuilder('o')
             ->select('t.id as target_id, SUM(o.amount) as sum')
             ->leftJoin('o.target', 't')
             ->andWhere('o.target in (:accounts)')
@@ -83,9 +50,9 @@ abstract class BaseOperationRepository extends BaseRepository
             ->getQuery()
             ->getResult();
 
-        foreach ($result as $accountInflow) {
-            $targetId         = $accountInflow['target_id'];
-            $sum              = $accountInflow['sum'];
+        foreach ($accountInflowSums as $accountInflowSum) {
+            $targetId         = $accountInflowSum['target_id'];
+            $sum              = $accountInflowSum['sum'];
             $account          = $accounts[$targetId];
             $groupedInflows[] = new AccountCash($account, $sum);
         }
@@ -94,42 +61,33 @@ abstract class BaseOperationRepository extends BaseRepository
     }
 
     /**
-     * Calculates the sum of all the cash flows of the provided funds for the given operation type.
+     * Calculates the sum of all the outflows for the accounts provided.
      *
-     * @param Fund[]  $funds
-     * @param integer $type
+     * @param Account[] $accounts
      *
-     * @return FundCash[]
-     *
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     *
-     * @see OperationTypeEnum
+     * @return AccountCash[]
      */
-    public function getFundCashFlowSums(array $funds, int $type): array
+    public function getAccountOutflowSums(array $accounts): array
     {
-        $groupedInflows = [];
+        $groupedOutflows = [];
 
-        $connection = $this->getEntityManager()->getConnection();
-        $sql = <<< 'SQL'
-SELECT fund_id,
-       SUM(amount) as sum
-FROM operation
-WHERE fund_id IN (?)
-      AND type = (?)
-GROUP BY fund_id
-SQL;
+        $accountOutflowSums = $this->createQueryBuilder('o')
+            ->select('s.id as source_id, SUM(o.amount) as sum')
+            ->leftJoin('o.source', 's')
+            ->andWhere('o.source in (:accounts)')
+            ->setParameter('accounts', $accounts)
+            ->groupBy('o.source')
+            ->getQuery()
+            ->getResult();
 
-        $fundIds = $this->getIds($funds);
-        $stmt    = $connection->executeQuery($sql, [$fundIds, $type], [Connection::PARAM_INT_ARRAY]);
-        foreach ($stmt->fetchAll() as $fundCashFlow) {
-            $fundId           = $fundCashFlow['fund_id'];
-            $sum              = $fundCashFlow['sum'];
-            $fund             = $funds[$fundId];
-            $groupedInflows[] = new FundCash($fund, $sum);
+        foreach ($accountOutflowSums as $accountOutflowSum) {
+            $sourceId          = $accountOutflowSum['source_id'];
+            $sum               = $accountOutflowSum['sum'];
+            $account           = $accounts[$sourceId];
+            $groupedOutflows[] = new AccountCash($account, $sum);
         }
 
-        return $groupedInflows;
+        return $groupedOutflows;
     }
 
     /**

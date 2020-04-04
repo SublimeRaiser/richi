@@ -4,7 +4,6 @@
 namespace App\Service;
 
 use App\Entity\Account;
-use App\Entity\Fund;
 use App\Entity\Operation\OperationDebt;
 use App\Entity\Operation\OperationDebtCollection;
 use App\Entity\Operation\OperationExpense;
@@ -12,9 +11,7 @@ use App\Entity\Operation\OperationIncome;
 use App\Entity\Operation\OperationLoan;
 use App\Entity\Operation\OperationRepayment;
 use App\Entity\Operation\OperationTransfer;
-use App\Enum\OperationTypeEnum;
 use App\Repository\AccountRepository;
-use App\Repository\FundRepository;
 use App\Repository\Operation\OperationDebtCollectionRepository;
 use App\Repository\Operation\OperationDebtRepository;
 use App\Repository\Operation\OperationExpenseRepository;
@@ -23,11 +20,10 @@ use App\Repository\Operation\OperationLoanRepository;
 use App\Repository\Operation\OperationRepaymentRepository;
 use App\Repository\Operation\OperationTransferRepository;
 use App\ValueObject\AccountCash;
-use App\ValueObject\FundCash;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class BalanceMonitor
+class AccountBalanceMonitor
 {
     /** @var EntityManagerInterface */
     private $em;
@@ -106,67 +102,6 @@ class BalanceMonitor
     }
 
     /**
-     * Returns array of fund balances.
-     *
-     * @param UserInterface $user
-     *
-     * @return FundCash[]
-     */
-    public function getFundBalances(UserInterface $user): array
-    {
-        $fundBalances = [];
-
-        /** @var FundRepository $fundRepo */
-        $fundRepo    = $this->em->getRepository(Fund::class);
-        $funds       = $fundRepo->findByUser($user);
-        $incomeSums  = $this->operationRepo->getFundCashFlowSums($funds, OperationTypeEnum::TYPE_INCOME);
-        $expenseSums = $this->operationRepo->getFundCashFlowSums($funds, OperationTypeEnum::TYPE_EXPENSE);
-
-        foreach ($funds as $fund) {
-            // Consider initial balance
-            $fundBalance = new FundCash($fund, $fund->getInitialBalance());
-
-            // Consider incomes
-            foreach ($incomeSums as $incomeSum) {
-                if ($incomeSum->getFund() !== $fund) {
-                    continue;
-                }
-                $incomeSumValue = $incomeSum->getValue();
-                $fundBalance    = new FundCash($fund, $fundBalance->getValue() + $incomeSumValue);
-            }
-
-            // Consider expenses
-            foreach ($expenseSums as $expenseSum) {
-                if ($expenseSum->getFund() !== $fund) {
-                    continue;
-                }
-                $expenseSumValue = $expenseSum->getValue();
-                $fundBalance     = new FundCash($fund, $fundBalance->getValue() - $expenseSumValue);
-            }
-
-            $fundBalances[] = $fundBalance;
-        }
-
-        return $fundBalances;
-    }
-
-    /**
-     * @param FundCash[] $fundBalances
-     *
-     * @return integer
-     */
-    public function calculateFundBalance(array $fundBalances): int
-    {
-        $total = 0;
-
-        foreach ($fundBalances as $fundBalance) {
-            $total += $fundBalance->getValue();
-        }
-
-        return $total;
-    }
-
-    /**
      * Returns an array with inflow sums for the provided accounts.
      *
      * @param Account[] $accounts
@@ -184,10 +119,10 @@ class BalanceMonitor
         /** @var OperationDebtCollectionRepository $operationDebtCollectionRepo */
         $operationDebtCollectionRepo = $this->em->getRepository(OperationDebtCollection::class);
 
-        $inflowIncomeSums         = $operationIncomeRepo->getInflowSums($accounts);
-        $inflowTransferSums       = $operationTransferRepo->getInflowSums($accounts);
-        $inflowDebtSums           = $operationDebtRepo->getInflowSums($accounts);
-        $inflowDebtCollectionSums = $operationDebtCollectionRepo->getInflowSums($accounts);
+        $inflowIncomeSums         = $operationIncomeRepo->getAccountInflowSums($accounts);
+        $inflowTransferSums       = $operationTransferRepo->getAccountInflowSums($accounts);
+        $inflowDebtSums           = $operationDebtRepo->getAccountInflowSums($accounts);
+        $inflowDebtCollectionSums = $operationDebtCollectionRepo->getAccountInflowSums($accounts);
 
         return array_merge($inflowIncomeSums, $inflowTransferSums, $inflowDebtSums, $inflowDebtCollectionSums);
     }
@@ -210,10 +145,10 @@ class BalanceMonitor
         /** @var OperationRepaymentRepository $operationRepaymentRepo */
         $operationRepaymentRepo = $this->em->getRepository(OperationRepayment::class);
 
-        $outflowExpenseSums   = $operationExpenseRepo->getOutflowSums($accounts);
-        $outflowTransferSums  = $operationTransferRepo->getOutflowSums($accounts);
-        $outflowLoanSums      = $operationLoanRepo->getOutflowSums($accounts);
-        $outflowRepaymentSums = $operationRepaymentRepo->getOutflowSums($accounts);
+        $outflowExpenseSums   = $operationExpenseRepo->getAccountOutflowSums($accounts);
+        $outflowTransferSums  = $operationTransferRepo->getAccountOutflowSums($accounts);
+        $outflowLoanSums      = $operationLoanRepo->getAccountOutflowSums($accounts);
+        $outflowRepaymentSums = $operationRepaymentRepo->getAccountOutflowSums($accounts);
 
         return array_merge($outflowExpenseSums, $outflowTransferSums, $outflowLoanSums, $outflowRepaymentSums);
     }

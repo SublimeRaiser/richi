@@ -4,7 +4,9 @@ namespace App\Controller;
 
 use App\Entity\Account;
 use App\Form\AccountType;
-use App\Service\BalanceMonitor;
+use App\Service\AccountBalanceMonitor;
+use App\Service\FundBalanceMonitor;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,17 +19,22 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 class AccountController extends AbstractController
 {
-    /** @var BalanceMonitor */
-    private $balanceMonitor;
+    /** @var AccountBalanceMonitor */
+    private $accountBalanceMonitor;
+
+    /** @var FundBalanceMonitor */
+    private $fundBalanceMonitor;
 
     /**
      * AccountController constructor.
      *
-     * @param BalanceMonitor $balanceMonitor
+     * @param AccountBalanceMonitor $accountBalanceMonitor
+     * @param FundBalanceMonitor    $fundBalanceMonitor
      */
-    public function __construct(BalanceMonitor $balanceMonitor)
+    public function __construct(AccountBalanceMonitor $accountBalanceMonitor, FundBalanceMonitor $fundBalanceMonitor)
     {
-        $this->balanceMonitor = $balanceMonitor;
+        $this->accountBalanceMonitor = $accountBalanceMonitor;
+        $this->fundBalanceMonitor    = $fundBalanceMonitor;
     }
 
     /**
@@ -40,10 +47,10 @@ class AccountController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_USER');
 
         $user            = $this->getUser();
-        $accountBalances = $this->balanceMonitor->getAccountBalances($user);
-        $total           = $this->balanceMonitor->calculateTotal($accountBalances);
-        $fundBalances    = $this->balanceMonitor->getFundBalances($user);
-        $fundBalance     = $this->balanceMonitor->calculateFundBalance($fundBalances);
+        $accountBalances = $this->accountBalanceMonitor->getAccountBalances($user);
+        $total           = $this->accountBalanceMonitor->calculateTotal($accountBalances);
+        $fundBalances    = $this->fundBalanceMonitor->getFundBalances($user);
+        $fundBalance     = $this->fundBalanceMonitor->calculateTotal($fundBalances);
 
         return $this->render('account/index.html.twig', [
             'accountBalances' => $accountBalances,
@@ -59,6 +66,8 @@ class AccountController extends AbstractController
      * @param Request $request
      *
      * @return Response
+     *
+     * @throws Exception
      */
     public function new(Request $request): Response
     {
