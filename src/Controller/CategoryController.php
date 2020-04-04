@@ -250,7 +250,7 @@ class CategoryController extends AbstractController
      */
     private function validateOperationType(?int $operationType): void
     {
-        $categoryClassName = $this->getFormClassName($operationType);
+        $categoryClassName = $this->getCategoryClassName($operationType);
         if (!class_exists($categoryClassName)) {
             throw new BadRequestHttpException('Unsupported operation type for a categories.');
         }
