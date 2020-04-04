@@ -54,10 +54,10 @@ class CategoryController extends AbstractController
         $user = $this->getUser();
 
         /** @var CategoryIncomeRepository $incomeCategoryRepo */
-        $incomeCategoryRepo  = $this->getDoctrine()->getRepository(CategoryIncome::class);
+        $incomeCategoryRepo  = $this->em->getRepository(CategoryIncome::class);
         $incomeCategories    = $incomeCategoryRepo->findByUser($user);
         /** @var CategoryExpenseRepository $expenseCategoryRepo */
-        $expenseCategoryRepo = $this->getDoctrine()->getRepository(CategoryExpense::class);
+        $expenseCategoryRepo = $this->em->getRepository(CategoryExpense::class);
         $expenseCategories   = $expenseCategoryRepo->findByUser($user);
 
         return $this->render('category/index.html.twig', [
@@ -188,7 +188,7 @@ class CategoryController extends AbstractController
     {
         $categoryClassName = $this->getCategoryClassName($operationType);
         /** @var BaseCategoryRepository $categoryRepo */
-        $categoryRepo      = $this->getDoctrine()->getRepository($categoryClassName);
+        $categoryRepo      = $this->em->getRepository($categoryClassName);
         /** @var BaseCategory|null $category */
         $category          = $categoryRepo->find($id);
         if (!$category) {
