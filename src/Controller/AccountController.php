@@ -47,16 +47,16 @@ class AccountController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_USER');
 
         $user            = $this->getUser();
-        $accountBalances = $this->accountBalanceMonitor->getAccountBalances($user);
-        $total           = $this->accountBalanceMonitor->calculateTotal($accountBalances);
-        $fundBalances    = $this->fundBalanceMonitor->getFundBalances($user);
-        $fundBalance     = $this->fundBalanceMonitor->calculateTotal($fundBalances);
+        $accountBalances = $this->accountBalanceMonitor->getBalances($user);
+        $accountsTotal   = $this->accountBalanceMonitor->calculateTotal($accountBalances);
+        $fundBalances    = $this->fundBalanceMonitor->getBalances($user);
+        $fundsTotal      = $this->fundBalanceMonitor->calculateTotal($fundBalances);
 
         return $this->render('account/index.html.twig', [
             'accountBalances' => $accountBalances,
-            'total'           => $total,
+            'accountsTotal'   => $accountsTotal,
             'fundBalances'    => $fundBalances,
-            'fundBalance'     => $fundBalance,
+            'fundsTotal'      => $fundsTotal,
         ]);
     }
 

@@ -29,7 +29,7 @@ class AccountBalanceMonitor
     private $em;
 
     /**
-     * BalanceMonitor constructor.
+     * AccountBalanceMonitor constructor.
      *
      * @param EntityManagerInterface $em
      */
@@ -45,7 +45,7 @@ class AccountBalanceMonitor
      *
      * @return AccountCash[]
      */
-    public function getAccountBalances(UserInterface $user): array
+    public function getBalances(UserInterface $user): array
     {
         $accountBalances = [];
 
@@ -86,6 +86,8 @@ class AccountBalanceMonitor
     }
 
     /**
+     * Calculates total value for the provided balances.
+     *
      * @param AccountCash[] $accountBalances
      *
      * @return integer

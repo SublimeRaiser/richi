@@ -19,7 +19,7 @@ class FundBalanceMonitor
     private $em;
 
     /**
-     * BalanceMonitor constructor.
+     * FundBalanceMonitor constructor.
      *
      * @param EntityManagerInterface $em
      */
@@ -35,7 +35,7 @@ class FundBalanceMonitor
      *
      * @return FundCash[]
      */
-    public function getFundBalances(UserInterface $user): array
+    public function getBalances(UserInterface $user): array
     {
         $fundBalances = [];
 
@@ -76,6 +76,9 @@ class FundBalanceMonitor
     }
 
     /**
+     *
+     * Calculates total value for the provided balances.
+     *
      * @param FundCash[] $fundBalances
      *
      * @return integer
