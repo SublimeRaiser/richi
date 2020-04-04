@@ -78,14 +78,15 @@ class CategoryController extends AbstractController
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
 
+        /** @var UserInterface $user */
+        $user = $this->getUser();
+
         $operationType = $this->operationNameFormatter->getTypeBySlug($operationSlug);
         $this->validateOperationType($operationType);
 
         $categoryClassName = $this->getCategoryClassName($operationType);
         /** @var BaseCategory $category */
         $category = new $categoryClassName();
-        /** @var UserInterface $user */
-        $user = $this->getUser();
         $category->setUser($user);
 
         $formClassName = $this->getFormClassName($operationType);
@@ -182,7 +183,7 @@ class CategoryController extends AbstractController
      *
      * @return BaseCategory
      *
-     * @throws NotFoundHttpException If category was not found
+     * @throws NotFoundHttpException If category was not found.
      */
     private function findCategory(?int $operationType, int $id): BaseCategory
     {
