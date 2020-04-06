@@ -2,7 +2,7 @@
 
 namespace App\Entity\Operation;
 
-use App\Entity\Debt;
+use App\Entity\Obligation\Debt;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -13,7 +13,7 @@ abstract class BaseOperationDebt extends BaseOperation
     /**
      * @var Debt
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Debt")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Obligation\Debt")
      * @ORM\JoinColumn(nullable=false)
      */
     protected $debt;

@@ -1,7 +1,9 @@
 <?php
 
-namespace App\Entity;
+namespace App\Entity\Obligation;
 
+use App\Entity\Person;
+use App\Entity\User;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
