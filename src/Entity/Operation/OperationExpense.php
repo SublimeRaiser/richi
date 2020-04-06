@@ -15,6 +15,7 @@ class OperationExpense extends BaseOperationCashFlow
      * @var Account|null
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\Account")
+     * @ORM\JoinColumn(nullable=false)
      */
     private $source;
 
@@ -22,6 +23,7 @@ class OperationExpense extends BaseOperationCashFlow
      * @var CategoryExpense
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\Category\CategoryExpense")
+     * @ORM\JoinColumn(nullable=false)
      */
     private $category;
 

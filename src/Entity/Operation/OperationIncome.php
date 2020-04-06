@@ -15,6 +15,7 @@ class OperationIncome extends BaseOperationCashFlow
      * @var Account|null
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\Account")
+     * @ORM\JoinColumn(nullable=false)
      */
     private $target;
 
@@ -22,6 +23,7 @@ class OperationIncome extends BaseOperationCashFlow
      * @var CategoryIncome
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\Category\CategoryIncome")
+     * @ORM\JoinColumn(nullable=false)
      */
     private $category;
 

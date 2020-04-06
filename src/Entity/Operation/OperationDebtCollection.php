@@ -14,6 +14,7 @@ class OperationDebtCollection extends BaseOperationObligation
      * @var Account|null
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\Account")
+     * @ORM\JoinColumn(nullable=false)
      */
     private $target;
 

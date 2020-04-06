@@ -14,6 +14,7 @@ class OperationTransfer extends BaseOperation
      * @var Account|null
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\Account")
+     * @ORM\JoinColumn(nullable=false)
      */
     private $source;
 
@@ -21,6 +22,7 @@ class OperationTransfer extends BaseOperation
      * @var Account|null
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\Account")
+     * @ORM\JoinColumn(nullable=false)
      */
     private $target;
 

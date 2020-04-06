@@ -14,6 +14,7 @@ abstract class BaseOperationObligation extends BaseOperation
      * @var Person|null
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\Person")
+     * @ORM\JoinColumn(nullable=false)
      */
     protected $person;
 
