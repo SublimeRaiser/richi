@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass="App\Repository\Operation\OperationLoanRepository")
  */
-class OperationLoan extends BaseOperationObligation
+class OperationLoan extends BaseOperationLoan
 {
     /**
      * @var Account|null
