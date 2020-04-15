@@ -41,6 +41,20 @@ abstract class BaseObligation
     private $user;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="description", type="string", nullable=true)
+     */
+    private $description;
+
+    /**
+     * @var DateTime
+     *
+     * @ORM\Column(name="due_date", type="date", nullable=true)
+     */
+    private $dueDate;
+
+    /**
      * @var DateTimeInterface
      *
      * @ORM\Column(type="datetime")
@@ -110,6 +124,46 @@ abstract class BaseObligation
     public function setUser(?User $user): self
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    /**
+     * @param string $description
+     *
+     * @return self
+     */
+    public function setDescription(?string $description): self
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * @return DateTime|null
+     */
+    public function getDueDate(): ?DateTime
+    {
+        return $this->dueDate;
+    }
+
+    /**
+     * @param DateTime|null $dueDate
+     *
+     * @return self
+     */
+    public function setDueDate(?DateTime $dueDate): self
+    {
+        $this->dueDate = $dueDate;
 
         return $this;
     }
