@@ -4,7 +4,6 @@
     {{ form_row(operationForm.source) }}
     {{ form_row(operationForm.amount) }}
     {{ form_row(operationForm.description) }}
-    {{ form_row(operationForm.tag) }}
     {{ form_row(operationForm._token) }}
     <button type="submit">Save</button>
-{{ form_end(operationForm, {'render_rest': false}) }}
+{{ form_end(operationForm) }}

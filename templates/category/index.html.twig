@@ -4,16 +4,16 @@
 
 {% block body %}
     <div style="float: right">
-        <a href="{{ path('category_new', {'operationName': 'expense'}) }}">Add expense category</a> |
-        <a href="{{ path('category_new', {'operationName': 'income'}) }}">Add income category</a>
+        <a href="{{ path('category_new', {'operationSlug': 'expense'}) }}">Add expense category</a> |
+        <a href="{{ path('category_new', {'operationSlug': 'income'}) }}">Add income category</a>
     </div>
     <div style="float: left; padding-right: 100px">
         <h1>Expense categories:</h1>
-        {% include 'category/_category_list.html.twig' with {'categories': expenseCategories} %}
+        {% include 'category/_category_list.html.twig' with {'categories': expenseCategories, 'operationSlug': 'expense'} %}
     </div>
     <div style="float: left">
         <h1>Income categories:</h1>
-        {% include 'category/_category_list.html.twig' with {'categories': incomeCategories} %}
+        {% include 'category/_category_list.html.twig' with {'categories': incomeCategories, 'operationSlug': 'income'} %}
     </div>
 {% endblock %}
 

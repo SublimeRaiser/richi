@@ -2,8 +2,9 @@
 
 namespace App\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use DateTime;
+use DateTimeInterface;
+use Exception;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -57,19 +58,14 @@ class Tag
     private $description;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Operation", mappedBy="tag", orphanRemoval=true)
-     */
-    private $operations;
-
-    /**
-     * @var \DateTimeInterface
+     * @var DateTimeInterface
      *
      * @ORM\Column(type="datetime")
      */
     private $createdAt;
 
     /**
-     * @var \DateTimeInterface
+     * @var DateTimeInterface
      *
      * @ORM\Column(type="datetime")
      */
@@ -80,9 +76,7 @@ class Tag
      */
     public function __construct()
     {
-        $this->operations = new ArrayCollection();
-
-        $now             = new \DateTime();
+        $now             = new DateTime();
         $this->createdAt = $now;
         $this->updatedAt = $now;
     }
@@ -114,7 +108,7 @@ class Tag
     /**
      * @param UserInterface|null $user
      *
-     * @return Tag
+     * @return self
      */
     public function setUser(?UserInterface $user): self
     {
@@ -134,7 +128,7 @@ class Tag
     /**
      * @param string $name
      *
-     * @return Tag
+     * @return self
      */
     public function setName(string $name): self
     {
@@ -154,7 +148,7 @@ class Tag
     /**
      * @param string|null $description
      *
-     * @return Tag
+     * @return self
      */
     public function setDescription(?string $description): self
     {
@@ -164,58 +158,17 @@ class Tag
     }
 
     /**
-     * @return Collection|Operation[]
+     * @return DateTimeInterface|null
      */
-    public function getOperations(): Collection
-    {
-        return $this->operations;
-    }
-
-    /**
-     * @param Operation $operation
-     *
-     * @return Tag
-     */
-    public function addOperation(Operation $operation): self
-    {
-        if (!$this->operations->contains($operation)) {
-            $this->operations[] = $operation;
-            $operation->setTag($this);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param Operation $operation
-     *
-     * @return Tag
-     */
-    public function removeOperation(Operation $operation): self
-    {
-        if ($this->operations->contains($operation)) {
-            $this->operations->removeElement($operation);
-            // set the owning side to null (unless already changed)
-            if ($operation->getTag() === $this) {
-                $operation->setTag(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return \DateTimeInterface|null
-     */
-    public function getCreatedAt(): ?\DateTimeInterface
+    public function getCreatedAt(): ?DateTimeInterface
     {
         return $this->createdAt;
     }
 
     /**
-     * @return \DateTimeInterface|null
+     * @return DateTimeInterface|null
      */
-    public function getUpdatedAt(): ?\DateTimeInterface
+    public function getUpdatedAt(): ?DateTimeInterface
     {
         return $this->updatedAt;
     }
@@ -224,9 +177,11 @@ class Tag
      * @ORM\PreUpdate()
      *
      * @return void
+     *
+     * @throws Exception
      */
     public function setUpdatedAtValue(): void
     {
-        $this->updatedAt = new \DateTime();
+        $this->updatedAt = new DateTime();
     }
 }

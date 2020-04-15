@@ -4,7 +4,8 @@ namespace App\Controller;
 
 use App\Entity\Fund;
 use App\Form\FundType;
-use App\Service\BalanceMonitor;
+use App\Service\FundBalanceMonitor;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,22 +14,19 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
- * Class FundController
- * @package App\Controller
- *
  * @Route("/fund")
  */
 class FundController extends AbstractController
 {
-    /** @var BalanceMonitor */
+    /** @var FundBalanceMonitor */
     private $balanceMonitor;
 
     /**
      * FundController constructor.
      *
-     * @param BalanceMonitor $balanceMonitor
+     * @param FundBalanceMonitor $balanceMonitor
      */
-    public function __construct(BalanceMonitor $balanceMonitor)
+    public function __construct(FundBalanceMonitor $balanceMonitor)
     {
         $this->balanceMonitor = $balanceMonitor;
     }
@@ -41,8 +39,8 @@ class FundController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_USER');
 
         $user         = $this->getUser();
-        $fundBalances = $this->balanceMonitor->getFundBalances($user);
-        $fundBalance  = $this->balanceMonitor->calculateFundBalance($fundBalances);
+        $fundBalances = $this->balanceMonitor->getBalances($user);
+        $fundBalance  = $this->balanceMonitor->calculateTotal($fundBalances);
 
         return $this->render('fund/index.html.twig', [
             'fundBalances' => $fundBalances,
@@ -56,6 +54,8 @@ class FundController extends AbstractController
      * @param Request $request
      *
      * @return Response
+     *
+     * @throws Exception
      */
     public function new(Request $request): Response
     {

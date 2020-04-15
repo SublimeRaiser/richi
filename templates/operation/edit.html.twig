@@ -1,0 +1,8 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit {{ operationName }}{% endblock %}
+
+{% block body %}
+    <h1>Edit {{ operationName }}:</h1>
+    {% include('operation/_form_' ~ operationSlug ~ '.html.twig') %}
+{% endblock %}

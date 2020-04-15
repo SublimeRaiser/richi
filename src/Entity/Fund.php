@@ -2,9 +2,10 @@
 
 namespace App\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -72,13 +73,6 @@ class Fund implements Identifiable
     private $person;
 
     /**
-     * @var ArrayCollection
-     *
-     * @ORM\OneToMany(targetEntity="App\Entity\Operation", mappedBy="fund", orphanRemoval=true)
-     */
-    private $operations;
-
-    /**
      * @var integer
      *
      * @ORM\Column(type="integer")
@@ -86,14 +80,14 @@ class Fund implements Identifiable
     private $initialBalance = 0;
 
     /**
-     * @var \DateTimeInterface
+     * @var DateTimeInterface
      *
      * @ORM\Column(type="datetime")
      */
     private $createdAt;
 
     /**
-     * @var \DateTimeInterface
+     * @var DateTimeInterface
      *
      * @ORM\Column(type="datetime")
      */
@@ -102,13 +96,11 @@ class Fund implements Identifiable
     /**
      * Fund constructor.
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function __construct()
     {
-        $this->operations = new ArrayCollection();
-
-        $now              = new \DateTime();
+        $now              = new DateTime();
         $this->createdAt  = $now;
         $this->updatedAt  = $now;
     }
@@ -140,7 +132,7 @@ class Fund implements Identifiable
     /**
      * @param UserInterface|null $user
      *
-     * @return Fund
+     * @return self
      */
     public function setUser(?UserInterface $user): self
     {
@@ -160,7 +152,7 @@ class Fund implements Identifiable
     /**
      * @param string $name
      *
-     * @return Fund
+     * @return self
      */
     public function setName(string $name): self
     {
@@ -180,7 +172,7 @@ class Fund implements Identifiable
     /**
      * @param string|null $icon
      *
-     * @return Fund
+     * @return self
      */
     public function setIcon(?string $icon): self
     {
@@ -200,7 +192,7 @@ class Fund implements Identifiable
     /**
      * @param string|null $description
      *
-     * @return Fund
+     * @return self
      */
     public function setDescription(?string $description): self
     {
@@ -220,52 +212,11 @@ class Fund implements Identifiable
     /**
      * @param Person|null $person
      *
-     * @return Fund
+     * @return self
      */
     public function setPerson(?Person $person): self
     {
         $this->person = $person;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection|Operation[]
-     */
-    public function getOperations(): Collection
-    {
-        return $this->operations;
-    }
-
-    /**
-     * @param Operation $operation
-     *
-     * @return Fund
-     */
-    public function addOperation(Operation $operation): self
-    {
-        if (!$this->operations->contains($operation)) {
-            $this->operations[] = $operation;
-            $operation->setFund($this);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param Operation $operation
-     *
-     * @return Fund
-     */
-    public function removeOperation(Operation $operation): self
-    {
-        if ($this->operations->contains($operation)) {
-            $this->operations->removeElement($operation);
-            // set the owning side to null (unless already changed)
-            if ($operation->getFund() === $this) {
-                $operation->setFund(null);
-            }
-        }
 
         return $this;
     }
@@ -281,7 +232,7 @@ class Fund implements Identifiable
     /**
      * @param integer $initialBalance
      *
-     * @return Fund
+     * @return self
      */
     public function setInitialBalance(int $initialBalance): self
     {
@@ -291,17 +242,17 @@ class Fund implements Identifiable
     }
 
     /**
-     * @return \DateTimeInterface|null
+     * @return DateTimeInterface|null
      */
-    public function getCreatedAt(): ?\DateTimeInterface
+    public function getCreatedAt(): ?DateTimeInterface
     {
         return $this->createdAt;
     }
 
     /**
-     * @return \DateTimeInterface|null
+     * @return DateTimeInterface|null
      */
-    public function getUpdatedAt(): ?\DateTimeInterface
+    public function getUpdatedAt(): ?DateTimeInterface
     {
         return $this->updatedAt;
     }
@@ -310,9 +261,11 @@ class Fund implements Identifiable
      * @ORM\PreUpdate()
      *
      * @return void
+     *
+     * @throws Exception
      */
     public function setUpdatedAtValue(): void
     {
-        $this->updatedAt = new \DateTime();
+        $this->updatedAt = new DateTime();
     }
 }

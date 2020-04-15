@@ -2,6 +2,9 @@
 
 namespace App\Entity;
 
+use DateTime;
+use DateTimeInterface;
+use Exception;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -51,13 +54,6 @@ class User implements UserInterface
     /**
      * @var ArrayCollection
      *
-     * @ORM\OneToMany(targetEntity="App\Entity\Operation", mappedBy="user", orphanRemoval=true)
-     */
-    private $operations;
-
-    /**
-     * @var ArrayCollection
-     *
      * @ORM\OneToMany(targetEntity="App\Entity\Account", mappedBy="user", orphanRemoval=true)
      */
     private $accounts;
@@ -68,13 +64,6 @@ class User implements UserInterface
      * @ORM\OneToMany(targetEntity="App\Entity\Person", mappedBy="user", orphanRemoval=true)
      */
     private $persons;
-
-    /**
-     * @var ArrayCollection
-     *
-     * @ORM\OneToMany(targetEntity="App\Entity\Category", mappedBy="user", orphanRemoval=true)
-     */
-    private $categories;
 
     /**
      * @var ArrayCollection
@@ -91,14 +80,7 @@ class User implements UserInterface
     private $funds;
 
     /**
-     * @var ArrayCollection
-     *
-     * @ORM\OneToMany(targetEntity="App\Entity\Debt", mappedBy="user", orphanRemoval=true)
-     */
-    private $debts;
-
-    /**
-     * @var \DateTimeInterface
+     * @var DateTimeInterface
      *
      * @ORM\Column(type="datetime")
      */
@@ -112,19 +94,16 @@ class User implements UserInterface
     /**
      * User constructor.
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function __construct()
     {
-        $this->operations = new ArrayCollection();
         $this->accounts   = new ArrayCollection();
         $this->persons    = new ArrayCollection();
-        $this->categories = new ArrayCollection();
         $this->tags       = new ArrayCollection();
         $this->funds      = new ArrayCollection();
-        $this->debts      = new ArrayCollection();
 
-        $now              = new \DateTime();
+        $now              = new DateTime();
         $this->createdAt  = $now;
         $this->updatedAt  = $now;
     }
@@ -148,7 +127,7 @@ class User implements UserInterface
     /**
      * @param string $email
      *
-     * @return User
+     * @return self
      */
     public function setEmail(string $email): self
     {
@@ -186,7 +165,7 @@ class User implements UserInterface
     /**
      * @param array $roles
      *
-     * @return User
+     * @return self
      */
     public function setRoles(array $roles): self
     {
@@ -208,7 +187,7 @@ class User implements UserInterface
     /**
      * @param string $password
      *
-     * @return User
+     * @return self
      */
     public function setPassword(string $password): self
     {
@@ -239,47 +218,6 @@ class User implements UserInterface
     }
 
     /**
-     * @return Collection|Operation[]
-     */
-    public function getOperations(): Collection
-    {
-        return $this->operations;
-    }
-
-    /**
-     * @param Operation $operation
-     *
-     * @return User
-     */
-    public function addOperation(Operation $operation): self
-    {
-        if (!$this->operations->contains($operation)) {
-            $this->operations[] = $operation;
-            $operation->setUser($this);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param Operation $operation
-     *
-     * @return User
-     */
-    public function removeOperation(Operation $operation): self
-    {
-        if ($this->operations->contains($operation)) {
-            $this->operations->removeElement($operation);
-            // set the owning side to null (unless already changed)
-            if ($operation->getUser() === $this) {
-                $operation->setUser(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
      * @return Collection|Account[]
      */
     public function getAccounts(): Collection
@@ -290,7 +228,7 @@ class User implements UserInterface
     /**
      * @param Account $account
      *
-     * @return User
+     * @return self
      */
     public function addAccount(Account $account): self
     {
@@ -305,7 +243,7 @@ class User implements UserInterface
     /**
      * @param Account $account
      *
-     * @return User
+     * @return self
      */
     public function removeAccount(Account $account): self
     {
@@ -331,7 +269,7 @@ class User implements UserInterface
     /**
      * @param Person $person
      *
-     * @return User
+     * @return self
      */
     public function addPerson(Person $person): self
     {
@@ -346,7 +284,7 @@ class User implements UserInterface
     /**
      * @param Person $person
      *
-     * @return User
+     * @return self
      */
     public function removePerson(Person $person): self
     {
@@ -355,47 +293,6 @@ class User implements UserInterface
             // set the owning side to null (unless already changed)
             if ($person->getUser() === $this) {
                 $person->setUser(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection|Category[]
-     */
-    public function getCategories(): Collection
-    {
-        return $this->categories;
-    }
-
-    /**
-     * @param Category $category
-     *
-     * @return User
-     */
-    public function addCategory(Category $category): self
-    {
-        if (!$this->categories->contains($category)) {
-            $this->categories[] = $category;
-            $category->setUser($this);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param Category $category
-     *
-     * @return User
-     */
-    public function removeCategory(Category $category): self
-    {
-        if ($this->categories->contains($category)) {
-            $this->categories->removeElement($category);
-            // set the owning side to null (unless already changed)
-            if ($category->getUser() === $this) {
-                $category->setUser(null);
             }
         }
 
@@ -413,7 +310,7 @@ class User implements UserInterface
     /**
      * @param Tag $tag
      *
-     * @return User
+     * @return self
      */
     public function addTag(Tag $tag): self
     {
@@ -428,7 +325,7 @@ class User implements UserInterface
     /**
      * @param Tag $tag
      *
-     * @return User
+     * @return self
      */
     public function removeTag(Tag $tag): self
     {
@@ -454,7 +351,7 @@ class User implements UserInterface
     /**
      * @param Fund $fund
      *
-     * @return User
+     * @return self
      */
     public function addFund(Fund $fund): self
     {
@@ -469,7 +366,7 @@ class User implements UserInterface
     /**
      * @param Fund $fund
      *
-     * @return User
+     * @return self
      */
     public function removeFund(Fund $fund): self
     {
@@ -485,58 +382,17 @@ class User implements UserInterface
     }
 
     /**
-     * @return Collection|Debt[]
+     * @return DateTimeInterface|null
      */
-    public function getDebts(): Collection
-    {
-        return $this->debts;
-    }
-
-    /**
-     * @param Debt $debt
-     *
-     * @return User
-     */
-    public function addDebt(Debt $debt): self
-    {
-        if (!$this->debts->contains($debt)) {
-            $this->debts[] = $debt;
-            $debt->setUser($this);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param Debt $debt
-     *
-     * @return User
-     */
-    public function removeDebt(Debt $debt): self
-    {
-        if ($this->debts->contains($debt)) {
-            $this->debts->removeElement($debt);
-            // set the owning side to null (unless already changed)
-            if ($debt->getUser() === $this) {
-                $debt->setUser(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return \DateTimeInterface|null
-     */
-    public function getCreatedAt(): ?\DateTimeInterface
+    public function getCreatedAt(): ?DateTimeInterface
     {
         return $this->createdAt;
     }
 
     /**
-     * @return \DateTimeInterface|null
+     * @return DateTimeInterface|null
      */
-    public function getUpdatedAt(): ?\DateTimeInterface
+    public function getUpdatedAt(): ?DateTimeInterface
     {
         return $this->updatedAt;
     }
@@ -545,9 +401,11 @@ class User implements UserInterface
      * @ORM\PreUpdate
      *
      * @return void
+     * 
+     * @throws Exception
      */
     public function setUpdatedAtValue(): void
     {
-        $this->updatedAt = new \DateTime();
+        $this->updatedAt = new DateTime();
     }
 }

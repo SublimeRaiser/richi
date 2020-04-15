@@ -45,7 +45,7 @@
                     <strong>Total:</strong>
                 </td>
                 <td style="text-align: right">
-                    <strong> {{ (total-fundBalance)|currency }} </strong>
+                    <strong> {{ (accountsTotal-fundsTotal)|currency }} </strong>
                 </td>
                 <td></td>
             </tr>
@@ -55,8 +55,8 @@
                     <td></td>
                     <td></td>
                     <td style="text-align: right">
-                        {% if fundBalance >= 0 %}<span>+</span>{% endif %}
-                        {{- fundBalance|currency -}}
+                        {% if fundsTotal >= 0 %}<span>+</span>{% endif %}
+                        {{- fundsTotal|currency -}}
                     </td>
                     <td> in <a href="{{ path('fund_index') }}">funds</a></td>
                 </tr>

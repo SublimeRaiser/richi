@@ -2,44 +2,64 @@
 
 namespace App\Controller;
 
-use App\Entity\Operation;
-use App\Enum\OperationTypeEnum;
-use App\Form\OperationType;
-use App\Repository\OperationRepository;
+use App\Entity\Operation\BaseOperation;
+use App\Entity\Operation\OperationExpense;
+use App\Entity\Operation\OperationIncome;
+use App\Repository\Category\BaseCategoryRepository;
+use App\Repository\Operation\OperationExpenseRepository;
+use App\Repository\Operation\OperationIncomeRepository;
 use App\Service\OperationList;
+use App\Service\OperationNameFormatter;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
- * Class OperationController
- * @package App\Controller
- *
  * @Route("/operation")
  */
 class OperationController extends AbstractController
 {
+    /** @var EntityManagerInterface */
+    private $em;
+
+    /** @var OperationNameFormatter */
+    private $operationNameFormatter;
+
     /** @var OperationList */
     private $operationList;
 
     /**
      * OperationController constructor.
      *
-     * @param OperationList $operationList
+     * @param EntityManagerInterface $em
+     * @param OperationNameFormatter $operationNameFormatter
+     * @param OperationList          $operationList
      */
-    public function __construct(OperationList $operationList)
-    {
-        $this->operationList = $operationList;
+    public function __construct(
+        EntityManagerInterface $em,
+        OperationNameFormatter $operationNameFormatter,
+        OperationList $operationList
+    ) {
+        $this->em                     = $em;
+        $this->operationNameFormatter = $operationNameFormatter;
+        $this->operationList          = $operationList;
     }
 
     /**
      * @Route("/", name="operation_index", methods={"GET"})
      *
      * @return Response
+     *
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
     public function index(): Response
     {
@@ -48,10 +68,12 @@ class OperationController extends AbstractController
         $user              = $this->getUser();
         $groupedOperations = $this->operationList->getGroupedByDays($user);
 
-        /** @var OperationRepository $operationRepo */
-        $operationRepo = $this->getDoctrine()->getRepository(Operation::class);
-        $expenseSum    = $operationRepo->getUserExpenseSum($user);
-        $incomeSum     = $operationRepo->getUserIncomeSum($user);
+        /** @var OperationExpenseRepository $operationExpenseRepo */
+        $operationExpenseRepo = $this->getDoctrine()->getRepository(OperationExpense::class);
+        $expenseSum           = $operationExpenseRepo->getUserCashFlowSum($user);
+        /** @var OperationIncomeRepository $operationIncomeRepo */
+        $operationIncomeRepo  = $this->getDoctrine()->getRepository(OperationIncome::class);
+        $incomeSum            = $operationIncomeRepo->getUserCashFlowSum($user);
 
         return $this->render('operation/index.html.twig', [
             'groupedOperations' => $groupedOperations,
@@ -61,136 +83,238 @@ class OperationController extends AbstractController
     }
 
     /**
-     * @Route("/new/{operationName}", name="operation_new", methods={"GET", "POST"})
+     * @Route("/{operationSlug}/new", name="operation_new", methods={"GET", "POST"})
      *
-     * @param string  $operationName
+     * @param string  $operationSlug
      * @param Request $request
      *
      * @return Response
      */
-    public function new(string $operationName, Request $request): Response
+    public function new(string $operationSlug, Request $request): Response
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
 
-        try {
-            $operationType = OperationTypeEnum::getTypeByName($operationName);
-        } catch (\Exception $e) {
-            throw new BadRequestHttpException($e->getMessage());
-        }
+        /** @var UserInterface $user */
+        $user = $this->getUser();
 
-        $operation = new Operation();
-        $operation->setType($operationType);
+        $operationType = $this->operationNameFormatter->getTypeBySlug($operationSlug);
+        $this->validateOperationType($operationType);
 
-        $form = $this->createForm(OperationType::class, $operation, [
-            'operation_type' => $operationType,
-        ]);
+        $operationClassName = $this->getOperationClassName($operationType);
+        /** @var BaseOperation $operation */
+        $operation = new $operationClassName();
+        $operation->setUser($user);
+
+        $formClassName = $this->getFormClassName($operationType);
+        $form = $this->createForm($formClassName, $operation);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            /** @var UserInterface $user */
-            $user = $this->getUser();
-            /** @var Operation $operation */
+            /** @var BaseOperation $operation */
             $operation = $form->getData();
-            $operation->setUser($user);
 
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($operation);
-            $em->flush();
+            $this->em->persist($operation);
+            $this->em->flush();
 
             return $this->redirectToRoute('operation_index');
         }
 
-        return $this->render('operation/new_'.$operationName.'.html.twig', [
+        return $this->render('operation/new.html.twig', [
             'operationForm' => $form->createView(),
+            'operationName' => $this->operationNameFormatter->getNameBySlug($operationSlug),
+            'operationSlug' => $operationSlug,
         ]);
     }
 
     /**
-     * @Route("/copy/{id}", name="operation_copy", methods={"GET", "POST"})
+     * @Route("/{operationSlug}/copy/{id}", name="operation_copy", methods={"GET", "POST"})
      *
-     * @param Operation $operation
-     * @param Request   $request
+     * @param string  $operationSlug
+     * @param integer $id
+     * @param Request $request
      *
      * @return Response
      */
-    public function copy(Operation $operation, Request $request): Response
+    public function copy(string $operationSlug, int $id, Request $request): Response
     {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
+        $operationType = $this->operationNameFormatter->getTypeBySlug($operationSlug);
+        $this->validateOperationType($operationType);
+
+        /** @var BaseOperation $operation */
+        $operation = $this->findOperation($operationType, $id);
         $this->denyAccessUnlessGranted('OPERATION_COPY', $operation);
 
         $clonedOperation = clone $operation;
-        $form            = $this->createForm(OperationType::class, $clonedOperation, [
-            'operation_type' => $clonedOperation->getType(),
-        ]);
+        $formClassName   = $this->getFormClassName($operationType);
+        $form            = $this->createForm($formClassName, $clonedOperation);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            /** @var Operation $clonedOperation */
+            /** @var BaseOperation $clonedOperation */
             $clonedOperation = $form->getData();
 
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($clonedOperation);
-            $em->flush();
+            $this->em->persist($clonedOperation);
+            $this->em->flush();
 
             return $this->redirectToRoute('operation_index');
         }
 
-        $operationType = $clonedOperation->getType();
-
-        return $this->render('operation/copy_'.OperationTypeEnum::getTypeName($operationType).'.html.twig', [
+        return $this->render('operation/copy.html.twig', [
             'operationForm' => $form->createView(),
+            'operationName' => $this->operationNameFormatter->getNameBySlug($operationSlug),
+            'operationSlug' => $operationSlug,
         ]);
     }
 
     /**
-     * @Route("/edit/{id}", name="operation_edit", methods={"GET", "POST"})
+     * @Route("/{operationSlug}/edit/{id}", name="operation_edit", methods={"GET", "POST"})
      *
-     * @param Operation $operation
-     * @param Request   $request
+     * @param string  $operationSlug
+     * @param integer $id
+     * @param Request $request
      *
      * @return Response
      */
-    public function edit(Operation $operation, Request $request): Response
+    public function edit(string $operationSlug, int $id, Request $request): Response
     {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
+        $operationType = $this->operationNameFormatter->getTypeBySlug($operationSlug);
+        $this->validateOperationType($operationType);
+
+        /** @var BaseOperation $operation */
+        $operation = $this->findOperation($operationType, $id);
         $this->denyAccessUnlessGranted('OPERATION_EDIT', $operation);
 
-        $form = $this->createForm(OperationType::class, $operation, [
-            'operation_type' => $operation->getType(),
-        ]);
+        $formClassName = $this->getFormClassName($operationType);
+        $form          = $this->createForm($formClassName, $operation);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            /** @var Operation $operation */
+            /** @var BaseOperation $operation */
             $operation = $form->getData();
 
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($operation);
-            $em->flush();
+            $this->em->persist($operation);
+            $this->em->flush();
 
             return $this->redirectToRoute('operation_index');
         }
 
-        $operationType = $operation->getType();
-
-        return $this->render('operation/edit_'.OperationTypeEnum::getTypeName($operationType).'.html.twig', [
+        return $this->render('operation/edit.html.twig', [
             'operationForm' => $form->createView(),
+            'operationName' => $this->operationNameFormatter->getNameBySlug($operationSlug),
+            'operationSlug' => $operationSlug,
         ]);
     }
 
     /**
-     * @Route("/{id}", name="operation_delete", methods={"DELETE"})
+     * @Route("/{operationSlug}/{id}", name="operation_delete", methods={"DELETE"})
      *
-     * @param Operation $operation
+     * @param string  $operationSlug
+     * @param integer $id
      *
      * @return Response
      */
-    public function delete(Operation $operation): Response
+    public function delete(string $operationSlug, int $id): Response
     {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
+        $operationType = $this->operationNameFormatter->getTypeBySlug($operationSlug);
+        $this->validateOperationType($operationType);
+
+        /** @var BaseOperation $operation */
+        $operation = $this->findOperation($operationType, $id);
         $this->denyAccessUnlessGranted('OPERATION_DELETE', $operation);
 
-        $em = $this->getDoctrine()->getManager();
-        $em->remove($operation);
-        $em->flush();
+        $this->em->remove($operation);
+        $this->em->flush();
 
         return new JsonResponse([       // TODO fix it
             'data' => 'Operation deleted successfully',
         ]);
+    }
+
+    /**
+     * Returns operation with the given ID for provided operation type.
+     *
+     * @param integer|null $operationType
+     * @param integer      $id
+     *
+     * @return BaseOperation
+     *
+     * @throws NotFoundHttpException If operation was not found.
+     */
+    private function findOperation(?int $operationType, int $id): BaseOperation
+    {
+        $operationClassName = $this->getOperationClassName($operationType);
+        /** @var BaseCategoryRepository $operationRepo */
+        $operationRepo      = $this->em->getRepository($operationClassName);
+        /** @var BaseOperation|null $operation */
+        $operation          = $operationRepo->find($id);
+        if (!$operation) {
+            $operationNameCamelCase = $this->operationNameFormatter->getCamelCaseByType($operationType);
+            throw $this->createNotFoundException(
+                sprintf('%s operation with ID %d not found.', $operationNameCamelCase, $id)
+            );
+        }
+
+        return $operation;
+    }
+
+    /**
+     * Returns operation class name for the provided operation type.
+     *
+     * @param integer|null $operationType
+     *
+     * @return string|null
+     */
+    private function getOperationClassName(?int $operationType): ?string
+    {
+        $categoryClassName      = null;
+        $operationNameCamelCase = null;
+        if ($operationType) {
+            $operationNameCamelCase = $this->operationNameFormatter->getCamelCaseByType($operationType);
+        }
+        if ($operationNameCamelCase) {
+            $categoryClassName = 'App\\Entity\\Operation\\' . 'Operation'. $operationNameCamelCase;
+        }
+
+        return $categoryClassName;
+    }
+
+    /**
+     * Returns class name for an operation form type depending on the operation type.
+     *
+     * @param integer|null $operationType
+     *
+     * @return string|null
+     */
+    private function getFormClassName(?int $operationType): ?string
+    {
+        $formClassName          = null;
+        $operationNameCamelCase = null;
+        if ($operationType) {
+            $operationNameCamelCase = $this->operationNameFormatter->getCamelCaseByType($operationType);
+        }
+        if ($operationNameCamelCase) {
+            $formClassName = 'App\\Form\\Operation\\' . 'Operation' . $operationNameCamelCase . 'Type';
+        }
+
+        return $formClassName;
+    }
+
+    /**
+     * Throws an exception if an operation class for the operation type does not exist.
+     *
+     * @param integer|null $operationType
+     *
+     * @throws BadRequestHttpException If the provided operation type is not supported.
+     */
+    private function validateOperationType(?int $operationType): void
+    {
+        $operationClassName = $this->getOperationClassName($operationType);
+        if (!class_exists($operationClassName)) {
+            throw new BadRequestHttpException('Unsupported operation type.');
+        }
     }
 }

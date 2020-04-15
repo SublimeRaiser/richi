@@ -9,9 +9,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * Class DebtAndLoanController
- * @package App\Controller
- *
  * @Route("/debt-and-loan")
  */
 class DebtAndLoanController extends AbstractController

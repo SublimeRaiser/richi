@@ -13,9 +13,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
- * Class TagController
- * @package App\Controller
- *
  * @Route("/tag")
  */
 class TagController extends AbstractController

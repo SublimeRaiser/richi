@@ -2,7 +2,7 @@
 
 namespace App\Service;
 
-use App\Entity\Operation;
+use App\Entity\BaseOperation;
 use App\Entity\Person;
 use App\Enum\OperationTypeEnum;
 use App\Repository\OperationRepository;
@@ -34,7 +34,7 @@ class DebtMonitor
     public function __construct(EntityManagerInterface $em)
     {
         $this->em            = $em;
-        $this->operationRepo = $em->getRepository(Operation::class);
+        $this->operationRepo = $em->getRepository(BaseOperation::class);
         $this->personRepo    = $em->getRepository(Person::class);
     }
 

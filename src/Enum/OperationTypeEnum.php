@@ -24,19 +24,19 @@ final class OperationTypeEnum
         self::TYPE_DEBT            => 'debt',
         self::TYPE_REPAYMENT       => 'repayment',
         self::TYPE_LOAN            => 'loan',
-        self::TYPE_DEBT_COLLECTION => 'debt-collection',
+        self::TYPE_DEBT_COLLECTION => 'debt collection',
     ];
 
     /**
-     * Returns User friendly name for the operation type.
+     * Returns user friendly name for the provided operation type.
      *
      * @param integer $type
      *
-     * @return string
+     * @return string|null
      */
-    public static function getTypeName(int $type): string
+    public static function getName(int $type): ?string
     {
-        return self::$typeNames[$type];
+        return self::$typeNames[$type] ?? null;
     }
 
     /**
@@ -47,24 +47,5 @@ final class OperationTypeEnum
     public static function getAvailableTypes(): array
     {
         return array_keys(self::$typeNames);
-    }
-
-    /**
-     * Returns operation type for the given operation name.
-     *
-     * @param string $name
-     *
-     * @return integer
-     *
-     * @throws \InvalidArgumentException When invalid operation name provided.
-     */
-    public static function getTypeByName(string $name): int
-    {
-        $type = array_search($name, self::$typeNames);
-        if ($type === false) {
-            throw new \InvalidArgumentException('Invalid operation name.');
-        }
-
-        return $type;
     }
 }

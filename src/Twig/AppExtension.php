@@ -4,13 +4,12 @@ namespace App\Twig;
 
 use App\Enum\OperationTypeEnum;
 use App\Form\DataTransformer\KopecksToRublesTransformer;
+use DateTime;
+use DateTimeZone;
+use Exception;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
-/**
- * Class AppExtension
- * @package App\Twig
- */
 class AppExtension extends AbstractExtension
 {
     /** @var KopecksToRublesTransformer */
@@ -35,6 +34,7 @@ class AppExtension extends AbstractExtension
             new TwigFilter('currency', [$this, 'formatCurrency']),
             new TwigFilter('operation_name', [$this, 'getOperationName']),
             new TwigFilter('date_human', [$this, 'formatDateForHumans']),
+            new TwigFilter('instance_of', [$this, 'isInstanceOf']),
         ];
     }
 
@@ -51,39 +51,37 @@ class AppExtension extends AbstractExtension
     }
 
     /**
-     * Returns for an operation of the given type.
+     * Returns a name for an operation of the given type.
      *
      * @param integer $operationType
      *
-     * @return string
+     * @return string|null
      */
-    public function getOperationName(int $operationType): string
+    public function getOperationName(int $operationType): ?string
     {
-        return OperationTypeEnum::getTypeName($operationType);
+        return OperationTypeEnum::getName($operationType);
     }
 
     /**
      * Returns a human-readable representation of the date provided as a timestamp.
      *
-     * @param integer|null $timestamp
+     * @param integer $timestamp
      *
-     * @return string|null
+     * @return string
+     *
+     * @throws Exception
      */
-    public function formatDateForHumans(?int $timestamp): ?string
+    public function formatDateForHumans(int $timestamp): string
     {
-        if (!$timestamp) {
-            return null;
-        }
-
-        $userTimezone    = new \DateTimeZone('Asia/Novosibirsk');       // TODO refactor to get from user settings
+        $userTimezone    = new DateTimeZone('Asia/Novosibirsk');       // TODO refactor to get from user settings
         $dateFormatFull  = 'F d, Y';                                    // TODO refactor to get from user settings
         $dateFormatShort = 'F d';                                       // TODO refactor to get from user settings
 
-        $date            = (\DateTime::createFromFormat('U', $timestamp));
+        $date            = DateTime::createFromFormat('U', $timestamp);
         $date->setTimezone($userTimezone);
 
-        $today           = new \DateTime('now', $userTimezone);
-        $yesterday       = new \DateTime('yesterday', $userTimezone);
+        $today           = new DateTime('now', $userTimezone);
+        $yesterday       = new DateTime('yesterday', $userTimezone);
         $dateYear        = $date->format('Y');
         $todayYear       = $today->format('Y');
         $dateFormat      = $dateYear === $todayYear ? $dateFormatShort : $dateFormatFull;
@@ -102,5 +100,18 @@ class AppExtension extends AbstractExtension
         }
 
         return $formattedDate;
+    }
+
+    /**
+     * Checks whether the object is an instance of the class with provided name.
+     *
+     * @param object $obj
+     * @param string $className
+     *
+     * @return boolean
+     */
+    public function isInstanceOf(object $obj, string $className): bool
+    {
+        return $obj instanceof $className;
     }
 }

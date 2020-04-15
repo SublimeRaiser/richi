@@ -2,9 +2,12 @@
 
 namespace App\Entity;
 
+use DateTime;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -66,26 +69,19 @@ class Person implements Identifiable
     /**
      * @var ArrayCollection
      *
-     * @ORM\OneToMany(targetEntity="App\Entity\Fund", mappedBy="person", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity="App\Entity\Fund", mappedBy="person")
      */
     private $funds;
 
     /**
-     * @var ArrayCollection
-     *
-     * @ORM\OneToMany(targetEntity="App\Entity\Debt", mappedBy="person", orphanRemoval=true)
-     */
-    private $debts;
-
-    /**
-     * @var \DateTimeInterface
+     * @var DateTimeInterface
      *
      * @ORM\Column(type="datetime")
      */
     private $createdAt;
 
     /**
-     * @var \DateTimeInterface
+     * @var DateTimeInterface
      *
      * @ORM\Column(type="datetime")
      */
@@ -97,9 +93,8 @@ class Person implements Identifiable
     public function __construct()
     {
         $this->funds     = new ArrayCollection();
-        $this->debts     = new ArrayCollection();
 
-        $now             = new \DateTime();
+        $now             = new DateTime();
         $this->createdAt = $now;
         $this->updatedAt = $now;
     }
@@ -131,7 +126,7 @@ class Person implements Identifiable
     /**
      * @param UserInterface|null $user
      *
-     * @return Person
+     * @return self
      */
     public function setUser(?UserInterface $user): self
     {
@@ -151,7 +146,7 @@ class Person implements Identifiable
     /**
      * @param string $name
      *
-     * @return Person
+     * @return self
      */
     public function setName(string $name): self
     {
@@ -171,7 +166,7 @@ class Person implements Identifiable
     /**
      * @param string|null $icon
      *
-     * @return Person
+     * @return self
      */
     public function setIcon(?string $icon): self
     {
@@ -191,7 +186,7 @@ class Person implements Identifiable
     /**
      * @param string|null $description
      *
-     * @return Person
+     * @return self
      */
     public function setDescription(?string $description): self
     {
@@ -211,7 +206,7 @@ class Person implements Identifiable
     /**
      * @param Fund $fund
      *
-     * @return Person
+     * @return self
      */
     public function addFund(Fund $fund): self
     {
@@ -226,7 +221,7 @@ class Person implements Identifiable
     /**
      * @param Fund $fund
      *
-     * @return Person
+     * @return self
      */
     public function removeFund(Fund $fund): self
     {
@@ -242,58 +237,17 @@ class Person implements Identifiable
     }
 
     /**
-     * @return Collection|Debt[]
+     * @return DateTimeInterface|null
      */
-    public function getDebts(): Collection
-    {
-        return $this->debts;
-    }
-
-    /**
-     * @param Debt $debt
-     *
-     * @return Person
-     */
-    public function addDebt(Debt $debt): self
-    {
-        if (!$this->debts->contains($debt)) {
-            $this->debts[] = $debt;
-            $debt->setPerson($this);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param Debt $debt
-     *
-     * @return Person
-     */
-    public function removeDebt(Debt $debt): self
-    {
-        if ($this->debts->contains($debt)) {
-            $this->debts->removeElement($debt);
-            // set the owning side to null (unless already changed)
-            if ($debt->getPerson() === $this) {
-                $debt->setPerson(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return \DateTimeInterface|null
-     */
-    public function getCreatedAt(): ?\DateTimeInterface
+    public function getCreatedAt(): ?DateTimeInterface
     {
         return $this->createdAt;
     }
 
     /**
-     * @return \DateTimeInterface|null
+     * @return DateTimeInterface|null
      */
-    public function getUpdatedAt(): ?\DateTimeInterface
+    public function getUpdatedAt(): ?DateTimeInterface
     {
         return $this->updatedAt;
     }
@@ -302,9 +256,11 @@ class Person implements Identifiable
      * @ORM\PreUpdate()
      *
      * @return void
+     *
+     * @throws Exception
      */
     public function setUpdatedAtValue(): void
     {
-        $this->updatedAt = new \DateTime();
+        $this->updatedAt = new DateTime();
     }
 }
