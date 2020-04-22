@@ -4,8 +4,10 @@ namespace App\Service;
 
 use App\Entity\Obligation\Debt;
 use App\Entity\Operation\OperationDebt;
+use App\Entity\Operation\OperationDebtRelief;
 use App\Entity\Operation\OperationRepayment;
 use App\Repository\Obligation\DebtRepository;
+use App\Repository\Operation\OperationDebtReliefRepository;
 use App\Repository\Operation\OperationDebtRepository;
 use App\Repository\Operation\OperationRepaymentRepository;
 use App\ValueObject\DebtSummary;
@@ -26,6 +28,9 @@ class DebtMonitor
     /** @var OperationRepaymentRepository */
     private $operationRepaymentRepo;
 
+    /** @var OperationDebtReliefRepository */
+    private $operationDebtReliefRepo;
+
     /**
      * DebtMonitor constructor.
      *
@@ -33,10 +38,11 @@ class DebtMonitor
      */
     public function __construct(EntityManagerInterface $em)
     {
-        $this->em                     = $em;
-        $this->debtRepo               = $em->getRepository(Debt::class);
-        $this->operationDebtRepo      = $em->getRepository(OperationDebt::class);
-        $this->operationRepaymentRepo = $em->getRepository(OperationRepayment::class);
+        $this->em                      = $em;
+        $this->debtRepo                = $em->getRepository(Debt::class);
+        $this->operationDebtRepo       = $em->getRepository(OperationDebt::class);
+        $this->operationRepaymentRepo  = $em->getRepository(OperationRepayment::class);
+        $this->operationDebtReliefRepo = $em->getRepository(OperationDebtRelief::class);
     }
 
     /**
@@ -48,13 +54,16 @@ class DebtMonitor
     {
         $debtSummaries = [];
 
-        $debts         = $this->debtRepo->findByUser($user);
-        $debtDates     = $this->operationDebtRepo->getDebtDates($debts);
-        $debtSums      = $this->operationDebtRepo->getDebtCashFlowSums($debts);
-        $repaymentSums = $this->operationRepaymentRepo->getDebtCashFlowSums($debts);
+        $debts          = $this->debtRepo->findByUser($user);
+        $debtDates      = $this->operationDebtRepo->getDebtDates($debts);
+        $debtSums       = $this->operationDebtRepo->getDebtCashFlowSums($debts);
+        $repaymentSums  = $this->operationRepaymentRepo->getDebtCashFlowSums($debts);
+        $debtReliefSums = $this->operationDebtReliefRepo->getDebtCashFlowSums($debts);
         foreach ($debts as $debt) {
             $date      = null;
             $amount    = 0;
+            $repayment = 0;
+            $relief    = 0;
             $remaining = 0;
 
             // Get date for debt
@@ -79,11 +88,21 @@ class DebtMonitor
                 if ($repaymentSum->getDebt() !== $debt) {
                     continue;
                 }
+                $repayment += $repaymentSum->getValue();
                 $remaining -= $repaymentSum->getValue();
             }
 
+            // Consider debt relief operations
+            foreach ($debtReliefSums as $debtReliefSum) {
+                if ($debtReliefSum->getDebt() !== $debt) {
+                    continue;
+                }
+                $relief    += $debtReliefSum->getValue();
+                $remaining -= $debtReliefSum->getValue();
+            }
+
             if ($debt && $amount) {
-                $debtSummary     = new DebtSummary($debt, $date, $amount, $remaining);
+                $debtSummary     = new DebtSummary($debt, $date, $amount, $repayment, $relief, $remaining);
                 $debtSummaries[] = $debtSummary;
             }
         }

@@ -3,6 +3,7 @@
 {% set typeTransfer       = operation|instance_of('App\\Entity\\Operation\\OperationTransfer') %}
 {% set typeDebt           = operation|instance_of('App\\Entity\\Operation\\OperationDebt') %}
 {% set typeRepayment      = operation|instance_of('App\\Entity\\Operation\\OperationRepayment') %}
+{% set typeDebtRelief     = operation|instance_of('App\\Entity\\Operation\\OperationDebtRelief') %}
 {% set typeLoan           = operation|instance_of('App\\Entity\\Operation\\OperationLoan') %}
 {% set typeDebtCollection = operation|instance_of('App\\Entity\\Operation\\OperationDebtCollection') %}
 
@@ -33,6 +34,7 @@
                 {% if typeTransfer %}       transfer        {% endif %}
                 {% if typeDebt %}           debt            {% endif %}
                 {% if typeRepayment %}      repayment       {% endif %}
+                {% if typeDebtRelief %}     debt relief     {% endif %}
                 {% if typeLoan %}           loan            {% endif %}
                 {% if typeDebtCollection %} debt collection {% endif %}
             {% endif %}
@@ -43,6 +45,7 @@
             {% if typeTransfer %}       &harr; {% endif %}
             {% if typeDebt %}           &plus; {% endif %}
             {% if typeRepayment %}      &ndash; {% endif %}
+            {% if typeDebtRelief %}     &times; {% endif %}
             {% if typeLoan %}           &ndash; {% endif %}
             {% if typeDebtCollection %} &plus; {% endif %}
             {{ operation.amount|currency }}
@@ -53,10 +56,11 @@
             {% if operation.category.name is defined %}
                 {{ operation.category.name }}
             {% endif %}
-            {% if typeDebt %}           debt from {{ operation.debt.person }}      {% endif %}
-            {% if typeRepayment %}      debt paid to {{ operation.debt.person }}   {% endif %}
-            {% if typeLoan %}           loan to {{ operation.loan.person }}        {% endif %}
-            {% if typeDebtCollection %} loan paid from {{ operation.loan.person }} {% endif %}
+            {% if typeDebt %}           debt from {{ operation.debt.person }}        {% endif %}
+            {% if typeRepayment %}      debt paid to {{ operation.debt.person }}     {% endif %}
+            {% if typeDebtRelief %}     debt relief from {{ operation.debt.person }} {% endif %}
+            {% if typeLoan %}           loan to {{ operation.loan.person }}          {% endif %}
+            {% if typeDebtCollection %} loan paid from {{ operation.loan.person }}   {% endif %}
         </span>
         <span style="float: right; font-size: small; color: gray">
             {% if operation.fund.name is defined %} [{{ operation.fund.name }}] {% endif %}
@@ -76,8 +80,9 @@
         {% if typeTransfer %}       {% set operationSlug = 'transfer' %}        {% endif %}
         {% if typeDebt %}           {% set operationSlug = 'debt' %}            {% endif %}
         {% if typeRepayment %}      {% set operationSlug = 'repayment' %}       {% endif %}
+        {% if typeDebtRelief %}     {% set operationSlug = 'debt-relief' %}     {% endif %}
         {% if typeLoan %}           {% set operationSlug = 'loan' %}            {% endif %}
-        {% if typeDebtCollection %} {% set operationSlug = 'loan-collection' %} {% endif %}
+        {% if typeDebtCollection %} {% set operationSlug = 'debt-collection' %} {% endif %}
         <a href="{{ path('operation_edit', {'id': operation.id, 'operationSlug': operationSlug}) }}">Edit</a> |
         <a href="{{ path('operation_copy', {'id': operation.id, 'operationSlug': operationSlug}) }}">Copy</a> |
         <a href="#"

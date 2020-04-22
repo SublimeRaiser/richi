@@ -6,12 +6,14 @@ namespace App\Service;
 use App\Entity\Operation\BaseOperation;
 use App\Entity\Operation\OperationDebt;
 use App\Entity\Operation\OperationDebtCollection;
+use App\Entity\Operation\OperationDebtRelief;
 use App\Entity\Operation\OperationExpense;
 use App\Entity\Operation\OperationIncome;
 use App\Entity\Operation\OperationLoan;
 use App\Entity\Operation\OperationRepayment;
 use App\Entity\Operation\OperationTransfer;
 use App\Repository\Operation\OperationDebtCollectionRepository;
+use App\Repository\Operation\OperationDebtReliefRepository;
 use App\Repository\Operation\OperationDebtRepository;
 use App\Repository\Operation\OperationExpenseRepository;
 use App\Repository\Operation\OperationIncomeRepository;
@@ -45,6 +47,9 @@ class OperationList
     /** @var OperationRepaymentRepository */
     private $operationRepaymentRepo;
 
+    /** @var OperationDebtReliefRepository */
+    private $operationDebtReliefRepo;
+
     /** @var OperationLoanRepository */
     private $operationLoanRepo;
 
@@ -64,6 +69,7 @@ class OperationList
         $this->operationTransferRepo       = $em->getRepository(OperationTransfer::class);
         $this->operationDebtRepo           = $em->getRepository(OperationDebt::class);
         $this->operationRepaymentRepo      = $em->getRepository(OperationRepayment::class);
+        $this->operationDebtReliefRepo     = $em->getRepository(OperationDebtRelief::class);
         $this->operationLoanRepo           = $em->getRepository(OperationLoan::class);
         $this->operationDebtCollectionRepo = $em->getRepository(OperationDebtCollection::class);
     }
@@ -84,10 +90,20 @@ class OperationList
         $transfers       = $this->operationTransferRepo->findByUser($user);
         $debts           = $this->operationDebtRepo->findByUser($user);
         $repayments      = $this->operationRepaymentRepo->findByUser($user);
+        $debtReliefs     = $this->operationDebtReliefRepo->findByUser($user);
         $loans           = $this->operationLoanRepo->findByUser($user);
         $debtCollections = $this->operationDebtCollectionRepo->findByUser($user);
 
-        $allOperations = array_merge($expenses, $incomes, $transfers, $debts, $repayments, $loans, $debtCollections);
+        $allOperations = array_merge(
+            $expenses,
+            $incomes,
+            $transfers,
+            $debts,
+            $repayments,
+            $debtReliefs,
+            $loans,
+            $debtCollections
+        );
         usort($allOperations, [$this, 'sortByDate']);
 
         /** @var BaseOperation $operation */
