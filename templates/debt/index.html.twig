@@ -3,41 +3,60 @@
 {% block title %}Debt list{% endblock %}
 
 {% block body %}
-    <div style="float: right">
-        <a href="{{ path('debt_new') }}">Add debt</a>
-    </div>
-    <h1>Debts:</h1>
-    <table>
-        <thead>
-        <th>Person</th>
-        <th>Due date</th>
-        <th>Description</th>
-        <th>Actions</th>
-        </thead>
-        <tbody>
-        {% for debt in debts %}
-            {% if debt.dueDate is not null %}
-                {% set debtDueDateForHuman = debt.dueDate.timestamp|date_human %}
-            {% else %}
-                {% set debtDueDateForHuman = null %}
-            {% endif %}
+    {% for debtSummary in debtSummaries %}
+        <p>{{ debtSummary.debt.person.name }}</p>
+        <p>Date: {{ debtSummary.date.timestamp|date_human }}</p>
+        <p>Amount: {{ debtSummary.amount|currency }}, remaining: {{ debtSummary.remaining|currency }}</p>
+        {% if debtSummary.debt.dueDate is not null %}
+            <p>DueDate: {{ debtSummary.debt.dueDate.timestamp|date_human }}</p>
+        {% endif %}
+        <hr>
+    {% else %}
+        <p>Congrats! There are not debts.</p>
+    {% endfor %}
 
-            <tr>
-                <td>{{ debt.person.name }}</td>
-                <td>{{ debtDueDateForHuman }}</td>
-                <td>{{ debt.description }}</td>
-                <td>
-                    <a href="{{ path('debt_edit', {'id': debt.id}) }}">Edit</a>
-                    <a href="#"
-                       class="js-debt-delete"
-                       data-person-name="{{ debt.person.name }}"
-                       data-amount="0.00"
-                       data-url="{{ path('debt_delete', {'id': debt.id}) }}">Delete</a>
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+
+{#    <div style="float: right">#}
+{#        <a href="{{ path('debt_new') }}">Add debt</a>#}
+{#    </div>#}
+{#    <h1>Debts:</h1>#}
+{#    <table>#}
+{#        <thead>#}
+{#        <th>Date</th>#}
+{#        <th>Person</th>#}
+{#        <th>Amount</th>#}
+{#        <th>Repayment</th>#}
+{#        <th>Description</th>#}
+{#        <th>Due date</th>#}
+{#        <th>Actions</th>#}
+{#        </thead>#}
+{#        <tbody>#}
+{#        {% for debt in debts %}#}
+{#            {% if debt.dueDate is not null %}#}
+{#                {% set debtDueDateForHuman = debt.dueDate.timestamp|date_human %}#}
+{#            {% else %}#}
+{#                {% set debtDueDateForHuman = null %}#}
+{#            {% endif %}#}
+
+{#            <tr>#}
+{#                <td>{{ debt.createdAt.timestamp|date_human }}</td>#}
+{#                <td>{{ debt.person.name }}</td>#}
+{#                <td style="text-align: right">10000.00</td>#}
+{#                <td style="text-align: right">0.00</td>#}
+{#                <td>{{ debt.description }}</td>#}
+{#                <td>{{ debtDueDateForHuman }}</td>#}
+{#                <td>#}
+{#                    <a href="{{ path('debt_edit', {'id': debt.id}) }}">Edit</a>#}
+{#                    <a href="#"#}
+{#                       class="js-debt-delete"#}
+{#                       data-person-name="{{ debt.person.name }}"#}
+{#                       data-amount="0.00"#}
+{#                       data-url="{{ path('debt_delete', {'id': debt.id}) }}">Delete</a>#}
+{#                </td>#}
+{#            </tr>#}
+{#        {% endfor %}#}
+{#        </tbody>#}
+{#    </table>#}
 {% endblock %}
 
 {% block javascripts %}

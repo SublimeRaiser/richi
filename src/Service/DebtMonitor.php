@@ -2,29 +2,29 @@
 
 namespace App\Service;
 
-use App\Entity\BaseOperation;
-use App\Entity\Person;
-use App\Enum\OperationTypeEnum;
-use App\Repository\OperationRepository;
-use App\Repository\PersonRepository;
-use App\ValueObject\PersonObligation;
+use App\Entity\Obligation\Debt;
+use App\Entity\Operation\OperationDebt;
+use App\Entity\Operation\OperationRepayment;
+use App\Repository\Obligation\DebtRepository;
+use App\Repository\Operation\OperationDebtRepository;
+use App\Repository\Operation\OperationRepaymentRepository;
+use App\ValueObject\DebtSummary;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-/**
- * Class DebtMonitor
- * @package App\Service
- */
 class DebtMonitor
 {
     /** @var EntityManagerInterface */
     private $em;
 
-    /** @var OperationRepository */
-    private $operationRepo;
+    /** @var DebtRepository */
+    private $debtRepo;
 
-    /** @var PersonRepository */
-    private $personRepo;
+    /** @var OperationDebtRepository */
+    private $operationDebtRepo;
+
+    /** @var OperationRepaymentRepository */
+    private $operationRepaymentRepo;
 
     /**
      * DebtMonitor constructor.
@@ -33,48 +33,61 @@ class DebtMonitor
      */
     public function __construct(EntityManagerInterface $em)
     {
-        $this->em            = $em;
-        $this->operationRepo = $em->getRepository(BaseOperation::class);
-        $this->personRepo    = $em->getRepository(Person::class);
+        $this->em                     = $em;
+        $this->debtRepo               = $em->getRepository(Debt::class);
+        $this->operationDebtRepo      = $em->getRepository(OperationDebt::class);
+        $this->operationRepaymentRepo = $em->getRepository(OperationRepayment::class);
     }
 
     /**
      * @param UserInterface $user
      *
-     * @return PersonObligation[]
+     * @return DebtSummary[]
      */
-    public function getDebtList(UserInterface $user): array
+    public function getDebtSummaries(UserInterface $user): array
     {
-        $debtList = [];
+        $debtSummaries = [];
 
-        $persons    = $this->personRepo->findByUser($user);
-        $debts      = $this->operationRepo->getPersonObligations($persons, OperationTypeEnum::TYPE_DEBT);
-        $repayments = $this->operationRepo->getPersonObligations($persons, OperationTypeEnum::TYPE_REPAYMENT);
+        $debts         = $this->debtRepo->findByUser($user);
+        $debtDates     = $this->operationDebtRepo->getDebtDates($debts);
+        $debtSums      = $this->operationDebtRepo->getDebtCashFlowSums($debts);
+        $repaymentSums = $this->operationRepaymentRepo->getDebtCashFlowSums($debts);
+        foreach ($debts as $debt) {
+            $date      = null;
+            $amount    = 0;
+            $remaining = 0;
 
-        foreach ($persons as $person) {
-            $personDebt = new PersonObligation($person, 0);
-
-            // Consider debts
-            foreach ($debts as $debt) {
-                if ($debt->getPerson() !== $person) {
+            // Get date for debt
+            foreach ($debtDates as $debtDate) {
+                if ($debtDate->getDebt() !== $debt) {
                     continue;
                 }
-                $personDebt = new PersonObligation($person, $personDebt->getValue() + $debt->getValue());
+                $date = $debtDate->getDate();
             }
 
-            // Consider repayments
-            foreach ($repayments as $repayment) {
-                if ($repayment->getPerson() !== $person) {
+            // Consider debt operations
+            foreach ($debtSums as $debtSum) {
+                if ($debtSum->getDebt() !== $debt) {
                     continue;
                 }
-                $personDebt = new PersonObligation($person, $personDebt->getValue() - $repayment->getValue());
+                $amount    += $debtSum->getValue();
+                $remaining += $debtSum->getValue();
             }
 
-            if ($personDebt->getValue()) {
-                $debtList[] = $personDebt;
+            // Consider repayment operations
+            foreach ($repaymentSums as $repaymentSum) {
+                if ($repaymentSum->getDebt() !== $debt) {
+                    continue;
+                }
+                $remaining -= $repaymentSum->getValue();
+            }
+
+            if ($debt && $amount) {
+                $debtSummary     = new DebtSummary($debt, $date, $amount, $remaining);
+                $debtSummaries[] = $debtSummary;
             }
         }
 
-        return $debtList;
+        return $debtSummaries;
     }
 }

@@ -53,10 +53,10 @@
             {% if operation.category.name is defined %}
                 {{ operation.category.name }}
             {% endif %}
-            {% if typeDebt %}           debt from {{ operation.person }}      {% endif %}
-            {% if typeRepayment %}      debt paid to {{ operation.person }}   {% endif %}
-            {% if typeLoan %}           loan to {{ operation.person }}        {% endif %}
-            {% if typeDebtCollection %} loan paid from {{ operation.person }} {% endif %}
+            {% if typeDebt %}           debt from {{ operation.debt.person }}      {% endif %}
+            {% if typeRepayment %}      debt paid to {{ operation.debt.person }}   {% endif %}
+            {% if typeLoan %}           loan to {{ operation.loan.person }}        {% endif %}
+            {% if typeDebtCollection %} loan paid from {{ operation.loan.person }} {% endif %}
         </span>
         <span style="float: right; font-size: small; color: gray">
             {% if operation.fund.name is defined %} [{{ operation.fund.name }}] {% endif %}

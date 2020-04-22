@@ -39,9 +39,9 @@ abstract class BaseOperationRepository extends BaseRepository
      */
     public function getAccountInflowSums(array $accounts): array
     {
-        $groupedInflows = [];
+        $accountInflowSums = [];
 
-        $accountInflowSums = $this->createQueryBuilder('o')
+        $results = $this->createQueryBuilder('o')
             ->select('t.id as target_id, SUM(o.amount) as sum')
             ->leftJoin('o.target', 't')
             ->andWhere('o.target in (:accounts)')
@@ -50,14 +50,14 @@ abstract class BaseOperationRepository extends BaseRepository
             ->getQuery()
             ->getResult();
 
-        foreach ($accountInflowSums as $accountInflowSum) {
-            $targetId         = $accountInflowSum['target_id'];
-            $sum              = $accountInflowSum['sum'];
-            $account          = $accounts[$targetId];
-            $groupedInflows[] = new AccountCash($account, $sum);
+        foreach ($results as $result) {
+            $targetId            = $result['target_id'];
+            $sum                 = $result['sum'];
+            $account             = $accounts[$targetId];
+            $accountInflowSums[] = new AccountCash($account, $sum);
         }
 
-        return $groupedInflows;
+        return $accountInflowSums;
     }
 
     /**
@@ -69,9 +69,9 @@ abstract class BaseOperationRepository extends BaseRepository
      */
     public function getAccountOutflowSums(array $accounts): array
     {
-        $groupedOutflows = [];
+        $accountOutflowSums = [];
 
-        $accountOutflowSums = $this->createQueryBuilder('o')
+        $results = $this->createQueryBuilder('o')
             ->select('s.id as source_id, SUM(o.amount) as sum')
             ->leftJoin('o.source', 's')
             ->andWhere('o.source in (:accounts)')
@@ -80,14 +80,14 @@ abstract class BaseOperationRepository extends BaseRepository
             ->getQuery()
             ->getResult();
 
-        foreach ($accountOutflowSums as $accountOutflowSum) {
-            $sourceId          = $accountOutflowSum['source_id'];
-            $sum               = $accountOutflowSum['sum'];
-            $account           = $accounts[$sourceId];
-            $groupedOutflows[] = new AccountCash($account, $sum);
+        foreach ($results as $result) {
+            $sourceId             = $result['source_id'];
+            $sum                  = $result['sum'];
+            $account              = $accounts[$sourceId];
+            $accountOutflowSums[] = new AccountCash($account, $sum);
         }
 
-        return $groupedOutflows;
+        return $accountOutflowSums;
     }
 
     /**
@@ -101,7 +101,7 @@ abstract class BaseOperationRepository extends BaseRepository
      */
     public function getPersonObligations(array $persons, int $type): array
     {
-        $groupedDebts = [];
+        $personObligations = [];
 
         $connection = $this->getEntityManager()->getConnection();
         $sql = <<< 'SQL'
@@ -116,13 +116,13 @@ SQL;
         $personIds = $this->getIds($persons);
         $stmt      = $connection->executeQuery($sql, [$personIds, $type], [Connection::PARAM_INT_ARRAY]);
         foreach ($stmt->fetchAll() as $personObligation) {
-            $personId       = $personObligation['person_id'];
-            $sum            = $personObligation['sum'];
-            $person         = $persons[$personId];
-            $groupedDebts[] = new PersonObligation($person, $sum);
+            $personId            = $personObligation['person_id'];
+            $sum                 = $personObligation['sum'];
+            $person              = $persons[$personId];
+            $personObligations[] = new PersonObligation($person, $sum);
         }
 
-        return $groupedDebts;
+        return $personObligations;
     }
 
     /**

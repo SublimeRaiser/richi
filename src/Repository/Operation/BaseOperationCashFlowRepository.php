@@ -42,9 +42,9 @@ abstract class BaseOperationCashFlowRepository extends BaseOperationRepository
      */
     public function getFundCashFlowSums(array $funds): array
     {
-        $groupedCashFlows = [];
+        $fundCashFlowSums = [];
 
-        $fundCashFlowSums = $this->createQueryBuilder('o')
+        $results = $this->createQueryBuilder('o')
             ->select('f.id as fund_id, SUM(o.amount) as sum')
             ->leftJoin('o.fund', 'f')
             ->andWhere('o.fund in (:funds)')
@@ -53,13 +53,13 @@ abstract class BaseOperationCashFlowRepository extends BaseOperationRepository
             ->getQuery()
             ->getResult();
 
-        foreach ($fundCashFlowSums as $fundCashFlowSum) {
-            $fundId             = $fundCashFlowSum['fund_id'];
-            $sum                = $fundCashFlowSum['sum'];
+        foreach ($results as $result) {
+            $fundId             = $result['fund_id'];
+            $sum                = $result['sum'];
             $fund               = $funds[$fundId];
-            $groupedCashFlows[] = new FundCash($fund, $sum);
+            $fundCashFlowSums[] = new FundCash($fund, $sum);
         }
 
-        return $groupedCashFlows;
+        return $fundCashFlowSums;
     }
 }

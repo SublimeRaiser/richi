@@ -2,19 +2,20 @@
 
 namespace App\Controller;
 
-use App\Entity\Debt;
-use App\Entity\Operation;
-use App\Enum\OperationTypeEnum;
+use App\Entity\Obligation\Debt;
+use App\Entity\Operation\OperationDebt;
 use App\Form\DebtType;
-use App\Repository\DebtRepository;
+use App\Repository\Obligation\DebtRepository;
 use App\Service\DebtMonitor;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * Class DebtController
@@ -24,26 +25,31 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 class DebtController extends AbstractController
 {
-    /** @var DebtMonitor */
-    private $debtMonitor;
-
     /** @var EntityManagerInterface */
     private $em;
 
     /** @var DebtRepository */
     private $debtRepo;
 
+    /** @var ValidatorInterface */
+    private $validator;
+
+    /** @var DebtMonitor */
+    private $debtMonitor;
+
     /**
      * DebtController constructor.
      *
-     * @param DebtMonitor            $debtMonitor
      * @param EntityManagerInterface $em
+     * @param ValidatorInterface     $validator
+     * @param DebtMonitor            $debtMonitor
      */
-    public function __construct(DebtMonitor $debtMonitor, EntityManagerInterface $em)
+    public function __construct(EntityManagerInterface $em, ValidatorInterface $validator, DebtMonitor $debtMonitor)
     {
-        $this->debtMonitor = $debtMonitor;
         $this->em          = $em;
         $this->debtRepo    = $em->getRepository(Debt::class);
+        $this->validator   = $validator;
+        $this->debtMonitor = $debtMonitor;
     }
 
     /**
@@ -53,11 +59,11 @@ class DebtController extends AbstractController
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
 
-        $user  = $this->getUser();
-        $debts = $this->debtRepo->findByUser($user);
+        $user          = $this->getUser();
+        $debtSummaries = $this->debtMonitor->getDebtSummaries($user);
 
         return $this->render('debt/index.html.twig', [
-            'debts' => $debts,
+            'debtSummaries' => $debtSummaries,
         ]);
     }
 
@@ -67,6 +73,8 @@ class DebtController extends AbstractController
      * @param Request $request
      *
      * @return Response
+     *
+     * @throws Exception
      */
     public function new(Request $request): Response
     {
@@ -79,45 +87,40 @@ class DebtController extends AbstractController
         $debt->setUser($user);
 
         $form = $this->createForm(DebtType::class, $debt);
-        $form->get('date')->setData(new \DateTime());
+        $form->get('date')->setData(new DateTime());
         $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            /** @var Debt $debt */
-            $debt = $form->getData();
 
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($debt);
+        $operationErrors = [];
+        if ($form->isSubmitted()) {
+            // Create instance for related debt operation
+            $operationDebt = new OperationDebt();
+            $date          = $form->get('date')->getData();
+            $target        = $form->get('target')->getData();
+            $amount        = $form->get('amount')->getData();
+            $operationDebt->setDate($date);
+            $operationDebt->setTarget($target);
+            $operationDebt->setAmount($amount);
+            $operationDebt->setDebt($debt);
+            $operationDebt->setUser($user);
+            $operationErrors = $this->validator->validate($operationDebt);
 
+            if ($form->isValid() && count($operationErrors) == 0) {
+                $debt = $form->getData();
+                $em   = $this->em;
+                $em->transactional(function ($em) use ($debt, $operationDebt) {
+                    /** @var EntityManagerInterface $em */
+                    $em->persist($debt);
+                    $em->persist($operationDebt);
+                    $em->flush();
+                });
 
-            $operation = new Operation();
-            $date   = $form->get('date')->getData();
-            $person = $form->get('person')->getData();
-            $target = $form->get('target')->getData();
-            $amount = $form->get('amount')->getData();
-            $operation->setUser($user);
-            $operation->setType(OperationTypeEnum::TYPE_DEBT);
-            $operation->setDate($date);
-            $operation->setPerson($person);
-            $operation->setTarget($target);
-            $operation->setAmount($amount);
-
-            // TODO add validation before persising
-
-            $em->persist($operation);
-
-
-
-
-
-
-
-            $em->flush();
-
-            return $this->redirectToRoute('debt_index');
+                return $this->redirectToRoute('debt_index');
+            }
         }
 
         return $this->render('debt/new.html.twig', [
-            'debtForm' => $form->createView(),
+            'debtForm'        => $form->createView(),
+            'operationErrors' => $operationErrors,
         ]);
     }
 
@@ -139,9 +142,8 @@ class DebtController extends AbstractController
             /** @var Debt $debt */
             $debt = $form->getData();
 
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($debt);
-            $em->flush();
+            $this->em->persist($debt);
+            $this->em->flush();
 
             return $this->redirectToRoute('debt_index');
         }
@@ -162,9 +164,8 @@ class DebtController extends AbstractController
     {
         $this->denyAccessUnlessGranted('DEBT_DELETE', $debt);
 
-        $em = $this->getDoctrine()->getManager();
-        $em->remove($debt);
-        $em->flush();
+        $this->em->remove($debt);
+        $this->em->flush();
 
         return new JsonResponse([       // TODO fix it
             'data' => 'Debt deleted successfully',

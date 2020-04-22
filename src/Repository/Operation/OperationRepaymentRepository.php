@@ -5,7 +5,7 @@ namespace App\Repository\Operation;
 use App\Entity\Operation\OperationRepayment;
 use Doctrine\Common\Persistence\ManagerRegistry;
 
-class OperationRepaymentRepository extends BaseOperationRepository
+class OperationRepaymentRepository extends BaseOperationDebtRepository
 {
     public function __construct(ManagerRegistry $registry)
     {

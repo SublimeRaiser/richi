@@ -3,10 +3,10 @@
 namespace App\Repository\Obligation;
 
 use App\Entity\Obligation\Loan;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use App\Repository\BaseRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
 
-class LoanRepository extends ServiceEntityRepository
+class LoanRepository extends BaseRepository
 {
     public function __construct(ManagerRegistry $registry)
     {

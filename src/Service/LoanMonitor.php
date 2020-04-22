@@ -38,43 +38,43 @@ class LoanMonitor
         $this->personRepo    = $em->getRepository(Person::class);
     }
 
-    /**
-     * @param UserInterface $user
-     *
-     * @return PersonObligation[]
-     */
-    public function getLoanList(UserInterface $user): array
-    {
-        $loanList = [];
-
-        $persons         = $this->personRepo->findByUser($user);
-        $loans           = $this->operationRepo->getPersonObligations($persons, OperationTypeEnum::TYPE_LOAN);
-        $debtCollections = $this->operationRepo->getPersonObligations($persons, OperationTypeEnum::TYPE_DEBT_COLLECTION);
-
-        foreach ($persons as $person) {
-            $personLoan = new PersonObligation($person, 0);
-
-            // Consider loans
-            foreach ($loans as $loan) {
-                if ($loan->getPerson() !== $person) {
-                    continue;
-                }
-                $personLoan = new PersonObligation($person, $personLoan->getValue() + $loan->getValue());
-            }
-
-            // Consider debt collections
-            foreach ($debtCollections as $debtCollection) {
-                if ($debtCollection->getPerson() !== $person) {
-                    continue;
-                }
-                $personLoan =  new PersonObligation($person, $personLoan->getValue() - $debtCollection->getValue());
-            }
-
-            if ($personLoan->getValue()) {
-                $loanList[] = $personLoan;
-            }
-        }
-
-        return $loanList;
-    }
+//    /**
+//     * @param UserInterface $user
+//     *
+//     * @return PersonObligation[]
+//     */
+//    public function getLoanList(UserInterface $user): array
+//    {
+//        $loanList = [];
+//
+//        $persons         = $this->personRepo->findByUser($user);
+//        $loans           = $this->operationRepo->getPersonObligations($persons, OperationTypeEnum::TYPE_LOAN);
+//        $debtCollections = $this->operationRepo->getPersonObligations($persons, OperationTypeEnum::TYPE_DEBT_COLLECTION);
+//
+//        foreach ($persons as $person) {
+//            $personLoan = new PersonObligation($person, 0);
+//
+//            // Consider loans
+//            foreach ($loans as $loan) {
+//                if ($loan->getPerson() !== $person) {
+//                    continue;
+//                }
+//                $personLoan = new PersonObligation($person, $personLoan->getValue() + $loan->getValue());
+//            }
+//
+//            // Consider debt collections
+//            foreach ($debtCollections as $debtCollection) {
+//                if ($debtCollection->getPerson() !== $person) {
+//                    continue;
+//                }
+//                $personLoan =  new PersonObligation($person, $personLoan->getValue() - $debtCollection->getValue());
+//            }
+//
+//            if ($personLoan->getValue()) {
+//                $loanList[] = $personLoan;
+//            }
+//        }
+//
+//        return $loanList;
+//    }
 }

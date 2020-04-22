@@ -3,7 +3,7 @@
 namespace App\Form;
 
 use App\Entity\Account;
-use App\Entity\Debt;
+use App\Entity\Obligation\Debt;
 use App\Entity\Person;
 use App\Form\DataTransformer\KopecksToRublesTransformer;
 use App\Repository\AccountRepository;

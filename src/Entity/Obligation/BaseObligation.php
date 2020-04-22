@@ -2,6 +2,7 @@
 
 namespace App\Entity\Obligation;
 
+use App\Entity\Identifiable;
 use App\Entity\Person;
 use DateTime;
 use DateTimeInterface;
@@ -13,7 +14,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * @ORM\MappedSuperclass()
  * @ORM\HasLifecycleCallbacks()
  */
-abstract class BaseObligation
+abstract class BaseObligation implements Identifiable
 {
     /**
      * @var integer
