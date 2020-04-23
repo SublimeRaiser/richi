@@ -44,9 +44,11 @@ abstract class BaseOperationType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('date', DateType::class)
+            ->add('date', DateType::class, [
+                'widget' => 'single_text',
+            ])
             ->add('amount', NumberType::class, [
-                'scale' => 2,
+                'scale'  => 2,
             ])
             ->add('description')
         ;
