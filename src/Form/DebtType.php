@@ -58,6 +58,7 @@ class DebtType extends AbstractType
 
         $builder
             ->add('date', DateType::class, [
+                'widget' => 'single_text',
                 'mapped' => false,
             ])
             ->add('person', EntityType::class, [
@@ -78,7 +79,10 @@ class DebtType extends AbstractType
                 'mapped' => false,
             ])
             ->add('description')
-            ->add('dueDate')
+            ->add('dueDate', DateType::class, [
+                'widget'   => 'single_text',
+                'required' => false,
+            ])
         ;
 
         $builder->get('amount')
