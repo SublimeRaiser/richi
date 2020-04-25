@@ -26,14 +26,12 @@ class AccountRepository extends BaseRepository
      */
     public function findByUser(UserInterface $user): array
     {
-        $result = $this->createQueryBuilder('a')
+        return $this->createQueryBuilder('a')
             ->andWhere('a.user = :user')
             ->setParameter('user', $user)
             ->addOrderBy('a.name', 'ASC')
             ->getQuery()
             ->getResult();
-
-        return $this->addIndexes($result);
     }
 
     /**
@@ -45,14 +43,12 @@ class AccountRepository extends BaseRepository
      */
     public function findNotArchived(UserInterface $user): array
     {
-        $result = $this->createQueryBuilder('a')
+        return $this->createQueryBuilder('a')
             ->andWhere('a.user = :user')
             ->andWhere('a.archived = false')
             ->setParameter('user', $user)
             ->addOrderBy('a.name', 'ASC')
             ->getQuery()
             ->getResult();
-
-        return $this->addIndexes($result);
     }
 }

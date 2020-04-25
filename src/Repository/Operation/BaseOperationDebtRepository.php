@@ -28,10 +28,13 @@ abstract class BaseOperationDebtRepository extends BaseOperationRepository
             ->getResult();
 
         foreach ($results as $result) {
-            $debtId             = $result['debt_id'];
-            $sum                = $result['sum'];
-            $debt               = $debts[$debtId];
-            $debtCashFlowSums[] = new DebtCash($debt, $sum);
+            $debtId = $result['debt_id'];
+            $sum    = $result['sum'];
+            $debt   = $this->findById($debts, $debtId);
+            /** @var Debt|null $debt */
+            if ($debt) {
+                $debtCashFlowSums[] = new DebtCash($debt, $sum);
+            }
         }
 
         return $debtCashFlowSums;

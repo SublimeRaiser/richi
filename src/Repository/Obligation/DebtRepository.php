@@ -23,13 +23,11 @@ class DebtRepository extends BaseRepository
      */
     public function findByUser(UserInterface $user): array
     {
-        $result = $this->createQueryBuilder('d')
+        return $this->createQueryBuilder('d')
             ->andWhere('d.user = :user')
             ->setParameter('user', $user)
             ->addOrderBy('d.createdAt', 'DESC')
             ->getQuery()
             ->getResult();
-
-        return $this->addIndexes($result);
     }
 }

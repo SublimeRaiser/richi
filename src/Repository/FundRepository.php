@@ -26,13 +26,11 @@ class FundRepository extends BaseRepository
      */
     public function findByUser(UserInterface $user): array
     {
-        $result = $this->createQueryBuilder('f')
+        return $this->createQueryBuilder('f')
             ->andWhere('f.user = :user')
             ->setParameter('user', $user)
             ->addOrderBy('f.name', 'ASC')
             ->getQuery()
             ->getResult();
-
-        return $this->addIndexes($result);
     }
 }

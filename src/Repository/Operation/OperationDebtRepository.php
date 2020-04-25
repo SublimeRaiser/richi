@@ -36,10 +36,13 @@ class OperationDebtRepository extends BaseOperationDebtRepository
             ->getResult();
 
         foreach ($results as $result) {
-            $debtId      = $result['debt_id'];
-            $date        = DateTime::createFromFormat('!Y-m-d', $result['date']);
-            $debt        = $debts[$debtId];
-            $debtDates[] = new DebtDate($debt, $date);
+            $debtId = $result['debt_id'];
+            $date   = DateTime::createFromFormat('!Y-m-d', $result['date']);
+            $debt   = $this->findById($debts, $debtId);
+            /** @var Debt|null $debt */
+            if ($debt) {
+                $debtDates[] = new DebtDate($debt, $date);
+            }
         }
 
         return $debtDates;

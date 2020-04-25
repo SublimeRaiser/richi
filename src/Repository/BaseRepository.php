@@ -12,23 +12,23 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 abstract class BaseRepository extends ServiceEntityRepository
 {
     /**
-     * Returns an array of the given entities with entity ID as an index.
+     * Returns an entity from the provided array with the provided ID.
      *
      * @param Identifiable[] $entities
+     * @param integer        $id
      *
-     * @return Identifiable[]
+     * @return Identifiable|null
      */
-    protected function addIndexes(array $entities): array
+    protected function findById(array $entities, int $id): ?Identifiable
     {
-        $indexedEntities = [];
+        $targetEntity = null;
 
         foreach ($entities as $entity) {
-            if (!$entity instanceof Identifiable) {
-                continue;
+            if ($entity->getId() === $id) {
+                $targetEntity = $entity;
             }
-            $indexedEntities[$entity->getId()] = $entity;
         }
 
-        return $indexedEntities;
+        return $targetEntity;
     }
 }

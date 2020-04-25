@@ -26,13 +26,11 @@ class PersonRepository extends BaseRepository
      */
     public function findByUser(UserInterface $user): array
     {
-        $result = $this->createQueryBuilder('p')
+        return $this->createQueryBuilder('p')
             ->andWhere('p.user = :user')
             ->setParameter('user', $user)
             ->orderBy('p.name', 'ASC')
             ->getQuery()
             ->getResult();
-
-        return $this->addIndexes($result);
     }
 }

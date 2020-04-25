@@ -28,10 +28,13 @@ abstract class BaseOperationLoanRepository extends BaseOperationRepository
             ->getResult();
 
         foreach ($results as $result) {
-            $loanId             = $result['loan_id'];
-            $sum                = $result['sum'];
-            $loan               = $loans[$loanId];
-            $loanCashFlowSums[] = new LoanCash($loan, $sum);
+            $loanId = $result['loan_id'];
+            $sum    = $result['sum'];
+            $loan   = $this->findById($loans, $loanId);
+            /** @var Loan|null $loan */
+            if ($loan) {
+                $loanCashFlowSums[] = new LoanCash($loan, $sum);
+            }
         }
 
         return $loanCashFlowSums;

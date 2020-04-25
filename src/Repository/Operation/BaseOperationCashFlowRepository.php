@@ -54,10 +54,13 @@ abstract class BaseOperationCashFlowRepository extends BaseOperationRepository
             ->getResult();
 
         foreach ($results as $result) {
-            $fundId             = $result['fund_id'];
-            $sum                = $result['sum'];
-            $fund               = $funds[$fundId];
-            $fundCashFlowSums[] = new FundCash($fund, $sum);
+            $fundId = $result['fund_id'];
+            $sum    = $result['sum'];
+            $fund   = $this->findById($funds, $fundId);
+            /** @var Fund|null $fund */
+            if ($fund) {
+                $fundCashFlowSums[] = new FundCash($fund, $sum);
+            }
         }
 
         return $fundCashFlowSums;

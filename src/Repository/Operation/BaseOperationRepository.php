@@ -51,10 +51,13 @@ abstract class BaseOperationRepository extends BaseRepository
             ->getResult();
 
         foreach ($results as $result) {
-            $targetId            = $result['target_id'];
-            $sum                 = $result['sum'];
-            $account             = $accounts[$targetId];
-            $accountInflowSums[] = new AccountCash($account, $sum);
+            $targetId = $result['target_id'];
+            $sum      = $result['sum'];
+            $account  = $this->findById($accounts, $targetId);
+            /** @var Account|null $account */
+            if ($account) {
+                $accountInflowSums[] = new AccountCash($account, $sum);
+            }
         }
 
         return $accountInflowSums;
@@ -81,10 +84,13 @@ abstract class BaseOperationRepository extends BaseRepository
             ->getResult();
 
         foreach ($results as $result) {
-            $sourceId             = $result['source_id'];
-            $sum                  = $result['sum'];
-            $account              = $accounts[$sourceId];
-            $accountOutflowSums[] = new AccountCash($account, $sum);
+            $sourceId = $result['source_id'];
+            $sum      = $result['sum'];
+            $account  = $this->findById($accounts, $sourceId);
+            /** @var Account|null $account */
+            if ($account) {
+                $accountOutflowSums[] = new AccountCash($account, $sum);
+            }
         }
 
         return $accountOutflowSums;
@@ -116,10 +122,13 @@ SQL;
         $personIds = $this->getIds($persons);
         $stmt      = $connection->executeQuery($sql, [$personIds, $type], [Connection::PARAM_INT_ARRAY]);
         foreach ($stmt->fetchAll() as $personObligation) {
-            $personId            = $personObligation['person_id'];
-            $sum                 = $personObligation['sum'];
-            $person              = $persons[$personId];
-            $personObligations[] = new PersonObligation($person, $sum);
+            $personId = $personObligation['person_id'];
+            $sum      = $personObligation['sum'];
+            $person   = $this->findById($persons, $personId);
+            /** @var Person|null $person */
+            if ($person) {
+                $personObligations[] = new PersonObligation($person, $sum);
+            }
         }
 
         return $personObligations;
