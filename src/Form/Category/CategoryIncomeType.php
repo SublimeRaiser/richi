@@ -19,6 +19,7 @@ class CategoryIncomeType extends BaseCategoryType
 
         /** @var CategoryIncomeRepository $categoryRepo */
         $categoryRepo = $this->em->getRepository(CategoryIncome::class);
+
         $builder
             ->add('parent', EntityType::class, [
                 'class'        => CategoryIncome::class,

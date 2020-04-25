@@ -50,7 +50,6 @@ class DebtType extends AbstractType
     {
         /** @var UserInterface $user */
         $user = $this->security->getUser();
-
         /** @var PersonRepository $personRepo */
         $personRepo  = $this->em->getRepository(Person::class);
         /** @var AccountRepository $accountRepo */

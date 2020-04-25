@@ -19,6 +19,7 @@ class CategoryExpenseType extends BaseCategoryType
 
         /** @var CategoryExpenseRepository $categoryRepo */
         $categoryRepo = $this->em->getRepository(CategoryExpense::class);
+
         $builder
             ->add('parent', EntityType::class, [
                 'class'        => CategoryExpense::class,
