@@ -53,7 +53,7 @@ class DebtController extends AbstractController
     }
 
     /**
-     * @Route("/", name="debt_index")
+     * @Route("/", name="debt_index", methods={"GET"})
      */
     public function index(): Response
     {

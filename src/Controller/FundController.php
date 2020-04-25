@@ -32,7 +32,7 @@ class FundController extends AbstractController
     }
 
     /**
-     * @Route("/", name="fund_index")
+     * @Route("/", name="fund_index", methods={"GET"})
      */
     public function index(): Response
     {
