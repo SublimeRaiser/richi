@@ -60,7 +60,8 @@ class DebtController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_USER');
 
         $user          = $this->getUser();
-        $debtSummaries = $this->debtMonitor->getDebtSummaries($user);
+        $debts         = $this->debtRepo->findByUser($user);
+        $debtSummaries = $this->debtMonitor->getDebtSummaries($debts);
 
         return $this->render('debt/index.html.twig', [
             'debtSummaries' => $debtSummaries,
@@ -121,6 +122,24 @@ class DebtController extends AbstractController
         return $this->render('debt/new.html.twig', [
             'debtForm'        => $form->createView(),
             'operationErrors' => $operationErrors,
+        ]);
+    }
+
+    /**
+     * @Route("/{id}", name="debt_show", methods={"GET"})
+     *
+     * @param Debt $debt
+     *
+     * @return Response
+     */
+    public function show(Debt $debt): Response
+    {
+        $this->denyAccessUnlessGranted('DEBT_VIEW', $debt);
+
+        $debtSummary = $this->debtMonitor->getDebtSummaries($debt)[0];
+
+        return $this->render('debt/show.html.twig', [
+            'debtSummary' => $debtSummary,
         ]);
     }
 

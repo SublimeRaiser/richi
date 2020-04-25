@@ -11,7 +11,7 @@ class DebtVoter extends Voter
 {
     protected function supports($attribute, $subject)
     {
-        return in_array($attribute, ['DEBT_EDIT', 'DEBT_DELETE'])
+        return in_array($attribute, ['DEBT_VIEW', 'DEBT_EDIT', 'DEBT_DELETE'])
             && $subject instanceof Debt;
     }
 
@@ -25,6 +25,7 @@ class DebtVoter extends Voter
 
         // ... (check conditions and return true to grant permission) ...
         switch ($attribute) {
+            case 'DEBT_VIEW':
             case 'DEBT_EDIT':
             case 'DEBT_DELETE':
                 if ($subject->getUser() === $user) {

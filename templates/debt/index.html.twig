@@ -3,16 +3,11 @@
 {% block title %}Debt list{% endblock %}
 
 {% block body %}
+    <div style="float: right">
+        <a href="{{ path('debt_new') }}">Add debt</a>
+    </div>
     {% for debtSummary in debtSummaries %}
-        <p>{{ debtSummary.debt.person.name }}</p>
-        <p>Date: {{ debtSummary.date.timestamp|date_human }}</p>
-        <p>Amount: {{ debtSummary.amount|currency }},
-           repayment: {{ debtSummary.repayment|currency }},
-           {% if debtSummary.relief != 0 %} relief: {{ debtSummary.relief|currency }}, {% endif %}
-           remaining: {{ debtSummary.remaining|currency }}</p>
-        {% if debtSummary.debt.dueDate is not null %}
-            <p>Due date: {{ debtSummary.debt.dueDate.timestamp|date_human }}</p>
-        {% endif %}
+        {{ include('debt/_summary.html.twig') }}
         <hr>
     {% else %}
         <p>Congrats! There are not debts.</p>
