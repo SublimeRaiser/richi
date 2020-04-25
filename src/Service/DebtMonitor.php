@@ -46,15 +46,20 @@ class DebtMonitor
     }
 
     /**
-     * @param UserInterface $user
+     * Returns an array with summaries for the debts.
+     *
+     * @param Debt[]|Debt $debts
      *
      * @return DebtSummary[]
      */
-    public function getDebtSummaries(UserInterface $user): array
+    public function getDebtSummaries($debts): array
     {
+        if (!is_array($debts)) {
+            $debts = [$debts];
+        }
+
         $debtSummaries = [];
 
-        $debts          = $this->debtRepo->findByUser($user);
         $debtDates      = $this->operationDebtRepo->getDebtDates($debts);
         $debtSums       = $this->operationDebtRepo->getDebtCashFlowSums($debts);
         $repaymentSums  = $this->operationRepaymentRepo->getDebtCashFlowSums($debts);
