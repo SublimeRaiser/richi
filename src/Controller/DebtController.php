@@ -7,6 +7,7 @@ use App\Entity\Operation\OperationDebt;
 use App\Form\DebtType;
 use App\Repository\Obligation\DebtRepository;
 use App\Service\DebtMonitor;
+use App\Service\OperationList;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -37,19 +38,28 @@ class DebtController extends AbstractController
     /** @var DebtMonitor */
     private $debtMonitor;
 
+    /** @var OperationList */
+    private $operationList;
+
     /**
      * DebtController constructor.
      *
      * @param EntityManagerInterface $em
      * @param ValidatorInterface     $validator
      * @param DebtMonitor            $debtMonitor
+     * @param OperationList          $operationList
      */
-    public function __construct(EntityManagerInterface $em, ValidatorInterface $validator, DebtMonitor $debtMonitor)
-    {
-        $this->em          = $em;
-        $this->debtRepo    = $em->getRepository(Debt::class);
-        $this->validator   = $validator;
-        $this->debtMonitor = $debtMonitor;
+    public function __construct(
+        EntityManagerInterface $em,
+        ValidatorInterface $validator,
+        DebtMonitor $debtMonitor,
+        OperationList $operationList
+    ) {
+        $this->em            = $em;
+        $this->debtRepo      = $em->getRepository(Debt::class);
+        $this->validator     = $validator;
+        $this->debtMonitor   = $debtMonitor;
+        $this->operationList = $operationList;
     }
 
     /**
@@ -137,9 +147,11 @@ class DebtController extends AbstractController
         $this->denyAccessUnlessGranted('DEBT_VIEW', $debt);
 
         $debtSummary = $this->debtMonitor->getDebtSummaries($debt)[0];
+        $operations  = $this->operationList->getOperationsByDebt($debt);
 
         return $this->render('debt/show.html.twig', [
             'debtSummary' => $debtSummary,
+            'operations'  => $operations,
         ]);
     }
 

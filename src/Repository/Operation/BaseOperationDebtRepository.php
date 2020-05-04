@@ -3,6 +3,7 @@
 namespace App\Repository\Operation;
 
 use App\Entity\Obligation\Debt;
+use App\Entity\Operation\BaseOperation;
 use App\ValueObject\DebtCash;
 
 abstract class BaseOperationDebtRepository extends BaseOperationRepository
@@ -38,5 +39,21 @@ abstract class BaseOperationDebtRepository extends BaseOperationRepository
         }
 
         return $debtCashFlowSums;
+    }
+
+    /**
+     * Returns an array of operations related to the debt.
+     *
+     * @param Debt $debt
+     *
+     * @return BaseOperation[]
+     */
+    public function findByDebt(Debt $debt): array
+    {
+        return $this->createQueryBuilder('o')
+            ->andWhere('o.debt = :debt')
+            ->setParameter('debt', $debt)
+            ->getQuery()
+            ->getResult();
     }
 }

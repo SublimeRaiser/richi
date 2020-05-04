@@ -7,6 +7,28 @@
         {{ include('debt/_summary.html.twig') }}
     </div>
     <div style="width: 50%; height: 500px; float: right;">
-
+        <p>Operations:</p>
+        <table>
+            <tbody>
+            {% for operation in operations %}
+                {% set typeDebt       = operation|instance_of('App\\Entity\\Operation\\OperationDebt') %}
+                {% set typeRepayment  = operation|instance_of('App\\Entity\\Operation\\OperationRepayment') %}
+                {% set typeDebtRelief = operation|instance_of('App\\Entity\\Operation\\OperationDebtRelief') %}
+                <tr>
+                    <td>{{ operation.date.timestamp|date_human }}</td>
+                    <td>
+                        {% if typeDebt %}       debt        {% endif %}
+                        {% if typeRepayment %}  repayment   {% endif %}
+                        {% if typeDebtRelief %} debt relief {% endif %}
+                    </td>
+                    <td style="text-align: right">{{ operation.amount|currency }}</td>
+                    <td>
+                        {% if typeDebt %}      {{ operation.target.name }} {% endif %}
+                        {% if typeRepayment %} {{ operation.source.name }} {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
     </div>
 {% endblock %}

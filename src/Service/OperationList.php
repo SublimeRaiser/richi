@@ -3,6 +3,7 @@
 
 namespace App\Service;
 
+use App\Entity\Obligation\Debt;
 use App\Entity\Operation\BaseOperation;
 use App\Entity\Operation\OperationDebt;
 use App\Entity\Operation\OperationDebtCollection;
@@ -113,6 +114,25 @@ class OperationList
         }
 
         return $groupedOperations;
+    }
+
+    /**
+     * Returns operation list for the debt.
+     *
+     * @param Debt $debt
+     *
+     * @return BaseOperation[]
+     */
+    public function getOperationsByDebt(Debt $debt): array
+    {
+        $debts       = $this->operationDebtRepo->findByDebt($debt);
+        $repayments  = $this->operationRepaymentRepo->findByDebt($debt);
+        $debtReliefs = $this->operationDebtReliefRepo->findByDebt($debt);
+
+        $allOperations = array_merge($debts, $repayments, $debtReliefs);
+        usort($allOperations, [$this, 'sortByDate']);
+
+        return $allOperations;
     }
 
     /**
