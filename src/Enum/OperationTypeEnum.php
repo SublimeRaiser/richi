@@ -13,8 +13,10 @@ final class OperationTypeEnum
     const TYPE_TRANSFER        = 3;
     const TYPE_DEBT            = 4;
     const TYPE_REPAYMENT       = 5;
-    const TYPE_LOAN            = 6;
-    const TYPE_DEBT_COLLECTION = 7;
+    const TYPE_DEBT_RELIEF     = 6;
+    const TYPE_LOAN            = 7;
+    const TYPE_DEBT_COLLECTION = 8;
+    const TYPE_LOAN_RELIEF     = 9;
 
     /** @var array User friendly named type */
     private static $typeNames = [
@@ -23,8 +25,10 @@ final class OperationTypeEnum
         self::TYPE_TRANSFER        => 'transfer',
         self::TYPE_DEBT            => 'debt',
         self::TYPE_REPAYMENT       => 'repayment',
+        self::TYPE_DEBT_RELIEF     => 'debt relief',
         self::TYPE_LOAN            => 'loan',
         self::TYPE_DEBT_COLLECTION => 'debt collection',
+        self::TYPE_LOAN_RELIEF     => 'loan relief',
     ];
 
     /**
