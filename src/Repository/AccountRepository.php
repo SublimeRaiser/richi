@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Account;
+use App\ValueObject\Collection\AccountCollection;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -22,16 +23,18 @@ class AccountRepository extends BaseRepository
      *
      * @param UserInterface $user
      *
-     * @return Account[]
+     * @return AccountCollection
      */
-    public function findByUser(UserInterface $user): array
+    public function findByUser(UserInterface $user): AccountCollection
     {
-        return $this->createQueryBuilder('a')
+        $result = $this->createQueryBuilder('a')
             ->andWhere('a.user = :user')
             ->setParameter('user', $user)
             ->addOrderBy('a.name', 'ASC')
             ->getQuery()
             ->getResult();
+
+        return new AccountCollection(...$result);
     }
 
     /**
@@ -39,16 +42,18 @@ class AccountRepository extends BaseRepository
      *
      * @param UserInterface $user
      *
-     * @return Account[]
+     * @return AccountCollection
      */
-    public function findNotArchived(UserInterface $user): array
+    public function findNotArchived(UserInterface $user): AccountCollection
     {
-        return $this->createQueryBuilder('a')
+        $result = $this->createQueryBuilder('a')
             ->andWhere('a.user = :user')
             ->andWhere('a.archived = false')
             ->setParameter('user', $user)
             ->addOrderBy('a.name', 'ASC')
             ->getQuery()
             ->getResult();
+
+        return new AccountCollection(...$result);
     }
 }

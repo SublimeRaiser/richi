@@ -3,6 +3,8 @@
 namespace App\Repository\Operation;
 
 use App\Entity\Fund;
+use App\ValueObject\Collection\FundCashCollection;
+use App\ValueObject\Collection\FundCollection;
 use App\ValueObject\FundCash;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -36,11 +38,11 @@ abstract class BaseOperationCashFlowRepository extends BaseOperationRepository
     /**
      * Calculates the sum of all the cash flows for each of the funds provided.
      *
-     * @param Fund[] $funds
+     * @param FundCollection $funds
      *
-     * @return FundCash[]
+     * @return FundCashCollection
      */
-    public function getFundCashFlowSums(array $funds): array
+    public function getFundCashFlowSums(FundCollection $funds): FundCashCollection
     {
         $fundCashFlowSums = [];
 
@@ -48,7 +50,7 @@ abstract class BaseOperationCashFlowRepository extends BaseOperationRepository
             ->select('f.id as fund_id, SUM(o.amount) as sum')
             ->leftJoin('o.fund', 'f')
             ->andWhere('o.fund in (:funds)')
-            ->setParameter('funds', $funds)
+            ->setParameter('funds', $funds->toArray())
             ->groupBy('o.fund')
             ->getQuery()
             ->getResult();
@@ -56,13 +58,13 @@ abstract class BaseOperationCashFlowRepository extends BaseOperationRepository
         foreach ($results as $result) {
             $fundId = $result['fund_id'];
             $sum    = $result['sum'];
-            $fund   = $this->findById($funds, $fundId);
+            $fund   = $this->findById($funds->toArray(), $fundId);
             /** @var Fund|null $fund */
             if ($fund) {
                 $fundCashFlowSums[] = new FundCash($fund, $sum);
             }
         }
 
-        return $fundCashFlowSums;
+        return new FundCashCollection(...$fundCashFlowSums);
     }
 }

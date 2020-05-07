@@ -21,6 +21,7 @@ use App\Repository\Operation\OperationIncomeRepository;
 use App\Repository\Operation\OperationLoanRepository;
 use App\Repository\Operation\OperationRepaymentRepository;
 use App\Repository\Operation\OperationTransferRepository;
+use App\ValueObject\Collection\Operation\BaseOperationCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -80,7 +81,7 @@ class OperationList
      *
      * @param UserInterface $user
      *
-     * @return BaseOperation[]
+     * @return BaseOperation[][]
      */
     public function getGroupedByDays(UserInterface $user): array
     {
@@ -96,14 +97,14 @@ class OperationList
         $debtCollections = $this->operationDebtCollectionRepo->findByUser($user);
 
         $allOperations = array_merge(
-            $expenses,
-            $incomes,
-            $transfers,
-            $debts,
-            $repayments,
-            $debtReliefs,
-            $loans,
-            $debtCollections
+            $expenses->toArray(),
+            $incomes->toArray(),
+            $transfers->toArray(),
+            $debts->toArray(),
+            $repayments->toArray(),
+            $debtReliefs->toArray(),
+            $loans->toArray(),
+            $debtCollections->toArray()
         );
         usort($allOperations, [$this, 'sortByDate']);
 
@@ -121,18 +122,22 @@ class OperationList
      *
      * @param Debt $debt
      *
-     * @return BaseOperation[]
+     * @return BaseOperationCollection
      */
-    public function getOperationsByDebt(Debt $debt): array
+    public function getOperationsByDebt(Debt $debt): BaseOperationCollection
     {
         $debts       = $this->operationDebtRepo->findByDebt($debt);
         $repayments  = $this->operationRepaymentRepo->findByDebt($debt);
         $debtReliefs = $this->operationDebtReliefRepo->findByDebt($debt);
 
-        $allOperations = array_merge($debts, $repayments, $debtReliefs);
+        $allOperations = array_merge(
+            $debts->toArray(),
+            $repayments->toArray(),
+            $debtReliefs->toArray()
+        );
         usort($allOperations, [$this, 'sortByDate']);
 
-        return $allOperations;
+        return new BaseOperationCollection(...$allOperations);
     }
 
     /**

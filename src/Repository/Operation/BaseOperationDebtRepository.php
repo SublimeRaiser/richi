@@ -3,7 +3,9 @@
 namespace App\Repository\Operation;
 
 use App\Entity\Obligation\Debt;
-use App\Entity\Operation\BaseOperation;
+use App\ValueObject\Collection\DebtCashCollection;
+use App\ValueObject\Collection\DebtCollection;
+use App\ValueObject\Collection\Operation\BaseOperationCollection;
 use App\ValueObject\DebtCash;
 
 abstract class BaseOperationDebtRepository extends BaseOperationRepository
@@ -11,11 +13,11 @@ abstract class BaseOperationDebtRepository extends BaseOperationRepository
     /**
      * Calculates the sum of all the cash flows for each of the debts provided.
      *
-     * @param Debt[] $debts
+     * @param DebtCollection $debts
      *
-     * @return DebtCash[]
+     * @return DebtCashCollection
      */
-    public function getDebtCashFlowSums(array $debts): array
+    public function getDebtCashFlowSums(DebtCollection $debts): DebtCashCollection
     {
         $debtCashFlowSums = [];
 
@@ -23,7 +25,7 @@ abstract class BaseOperationDebtRepository extends BaseOperationRepository
             ->select('d.id as debt_id, SUM(o.amount) as sum')
             ->leftJoin('o.debt', 'd')
             ->andWhere('o.debt in (:debts)')
-            ->setParameter('debts', $debts)
+            ->setParameter('debts', $debts->toArray())
             ->groupBy('o.debt')
             ->getQuery()
             ->getResult();
@@ -31,14 +33,14 @@ abstract class BaseOperationDebtRepository extends BaseOperationRepository
         foreach ($results as $result) {
             $debtId = $result['debt_id'];
             $sum    = $result['sum'];
-            $debt   = $this->findById($debts, $debtId);
+            $debt   = $this->findById($debts->toArray(), $debtId);
             /** @var Debt|null $debt */
             if ($debt) {
                 $debtCashFlowSums[] = new DebtCash($debt, $sum);
             }
         }
 
-        return $debtCashFlowSums;
+        return new DebtCashCollection(...$debtCashFlowSums);
     }
 
     /**
@@ -46,14 +48,16 @@ abstract class BaseOperationDebtRepository extends BaseOperationRepository
      *
      * @param Debt $debt
      *
-     * @return BaseOperation[]
+     * @return BaseOperationCollection
      */
-    public function findByDebt(Debt $debt): array
+    public function findByDebt(Debt $debt): BaseOperationCollection
     {
-        return $this->createQueryBuilder('o')
+        $result = $this->createQueryBuilder('o')
             ->andWhere('o.debt = :debt')
             ->setParameter('debt', $debt)
             ->getQuery()
             ->getResult();
+
+        return new BaseOperationCollection(...$result);
     }
 }

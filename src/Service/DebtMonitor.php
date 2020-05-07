@@ -10,9 +10,10 @@ use App\Repository\Obligation\DebtRepository;
 use App\Repository\Operation\OperationDebtReliefRepository;
 use App\Repository\Operation\OperationDebtRepository;
 use App\Repository\Operation\OperationRepaymentRepository;
+use App\ValueObject\Collection\DebtCollection;
+use App\ValueObject\Collection\DebtSummaryCollection;
 use App\ValueObject\DebtSummary;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
 
 class DebtMonitor
 {
@@ -48,16 +49,12 @@ class DebtMonitor
     /**
      * Returns an array with summaries for the debts.
      *
-     * @param Debt[]|Debt $debts
+     * @param DebtCollection $debts
      *
-     * @return DebtSummary[]
+     * @return DebtSummaryCollection
      */
-    public function getDebtSummaries($debts): array
+    public function getDebtSummaries(DebtCollection $debts): DebtSummaryCollection
     {
-        if (!is_array($debts)) {
-            $debts = [$debts];
-        }
-
         $debtSummaries = [];
 
         $debtDates      = $this->operationDebtRepo->getDebtDates($debts);
@@ -112,6 +109,6 @@ class DebtMonitor
             }
         }
 
-        return $debtSummaries;
+        return new DebtSummaryCollection(...$debtSummaries);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Tag;
+use App\ValueObject\Collection\TagCollection;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -22,15 +23,17 @@ class TagRepository extends BaseRepository
      *
      * @param UserInterface $user
      *
-     * @return Tag[]
+     * @return TagCollection
      */
-    public function findByUser(UserInterface $user): array
+    public function findByUser(UserInterface $user): TagCollection
     {
-        return $this->createQueryBuilder('t')
+        $result = $this->createQueryBuilder('t')
             ->andWhere('t.user = :user')
             ->setParameter('user', $user)
             ->orderBy('t.name', 'ASC')
             ->getQuery()
             ->getResult();
+
+        return new TagCollection(...$result);
     }
 }

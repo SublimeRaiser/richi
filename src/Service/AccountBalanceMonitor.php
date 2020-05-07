@@ -20,6 +20,8 @@ use App\Repository\Operation\OperationLoanRepository;
 use App\Repository\Operation\OperationRepaymentRepository;
 use App\Repository\Operation\OperationTransferRepository;
 use App\ValueObject\AccountCash;
+use App\ValueObject\Collection\AccountCashCollection;
+use App\ValueObject\Collection\AccountCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -43,9 +45,9 @@ class AccountBalanceMonitor
      *
      * @param UserInterface $user
      *
-     * @return AccountCash[]
+     * @return AccountCashCollection
      */
-    public function getBalances(UserInterface $user): array
+    public function getBalances(UserInterface $user): AccountCashCollection
     {
         $accountBalances = [];
 
@@ -82,20 +84,21 @@ class AccountBalanceMonitor
             $accountBalances[] = $accountBalance;
         }
 
-        return $accountBalances;
+        return new AccountCashCollection(...$accountBalances);
     }
 
     /**
      * Calculates total value for the provided balances.
      *
-     * @param AccountCash[] $accountBalances
+     * @param AccountCashCollection $accountBalances
      *
      * @return integer
      */
-    public function calculateTotal(array $accountBalances): int
+    public function calculateTotal(AccountCashCollection $accountBalances): int
     {
         $total = 0;
 
+        /** @var AccountCash $accountBalance */
         foreach ($accountBalances as $accountBalance) {
             $total += $accountBalance->getValue();
         }
@@ -106,11 +109,11 @@ class AccountBalanceMonitor
     /**
      * Returns an array with inflow sums for the provided accounts.
      *
-     * @param Account[] $accounts
+     * @param AccountCollection $accounts
      *
-     * @return AccountCash[]
+     * @return AccountCashCollection
      */
-    private function getInflowSums(array $accounts): array
+    private function getInflowSums(AccountCollection $accounts): AccountCashCollection
     {
         /** @var OperationIncomeRepository $operationIncomeRepo */
         $operationIncomeRepo         = $this->em->getRepository(OperationIncome::class);
@@ -126,17 +129,24 @@ class AccountBalanceMonitor
         $inflowDebtSums           = $operationDebtRepo->getAccountInflowSums($accounts);
         $inflowDebtCollectionSums = $operationDebtCollectionRepo->getAccountInflowSums($accounts);
 
-        return array_merge($inflowIncomeSums, $inflowTransferSums, $inflowDebtSums, $inflowDebtCollectionSums);
+        $inflowSums = array_merge(
+            $inflowIncomeSums->toArray(),
+            $inflowTransferSums->toArray(),
+            $inflowDebtSums->toArray(),
+            $inflowDebtCollectionSums->toArray()
+        );
+
+        return new AccountCashCollection(...$inflowSums);
     }
 
     /**
      * Returns an array with outflow sums for the provided accounts.
      *
-     * @param Account[] $accounts
+     * @param AccountCollection $accounts
      *
-     * @return AccountCash[]
+     * @return AccountCashCollection
      */
-    private function getOutflowSums(array $accounts): array
+    private function getOutflowSums(AccountCollection $accounts): AccountCashCollection
     {
         /** @var OperationExpenseRepository $operationExpenseRepo */
         $operationExpenseRepo   = $this->em->getRepository(OperationExpense::class);
@@ -152,6 +162,13 @@ class AccountBalanceMonitor
         $outflowLoanSums      = $operationLoanRepo->getAccountOutflowSums($accounts);
         $outflowRepaymentSums = $operationRepaymentRepo->getAccountOutflowSums($accounts);
 
-        return array_merge($outflowExpenseSums, $outflowTransferSums, $outflowLoanSums, $outflowRepaymentSums);
+        $outflowSums = array_merge(
+            $outflowExpenseSums->toArray(),
+            $outflowTransferSums->toArray(),
+            $outflowLoanSums->toArray(),
+            $outflowRepaymentSums->toArray()
+        );
+
+        return new AccountCashCollection(...$outflowSums);
     }
 }

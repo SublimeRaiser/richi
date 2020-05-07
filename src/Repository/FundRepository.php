@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Fund;
+use App\ValueObject\Collection\FundCollection;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -22,15 +23,17 @@ class FundRepository extends BaseRepository
      *
      * @param UserInterface $user
      *
-     * @return Fund[]
+     * @return FundCollection
      */
-    public function findByUser(UserInterface $user): array
+    public function findByUser(UserInterface $user): FundCollection
     {
-        return $this->createQueryBuilder('f')
+        $result = $this->createQueryBuilder('f')
             ->andWhere('f.user = :user')
             ->setParameter('user', $user)
             ->addOrderBy('f.name', 'ASC')
             ->getQuery()
             ->getResult();
+
+        return new FundCollection(...$result);
     }
 }

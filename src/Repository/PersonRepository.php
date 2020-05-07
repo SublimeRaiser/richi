@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Person;
+use App\ValueObject\Collection\PersonCollection;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -22,15 +23,17 @@ class PersonRepository extends BaseRepository
      *
      * @param UserInterface $user
      *
-     * @return Person[]
+     * @return PersonCollection
      */
-    public function findByUser(UserInterface $user): array
+    public function findByUser(UserInterface $user): PersonCollection
     {
-        return $this->createQueryBuilder('p')
+        $result = $this->createQueryBuilder('p')
             ->andWhere('p.user = :user')
             ->setParameter('user', $user)
             ->orderBy('p.name', 'ASC')
             ->getQuery()
             ->getResult();
+
+        return new PersonCollection(...$result);
     }
 }

@@ -8,6 +8,7 @@ use App\Form\DebtType;
 use App\Repository\Obligation\DebtRepository;
 use App\Service\DebtMonitor;
 use App\Service\OperationList;
+use App\ValueObject\Collection\DebtCollection;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -146,8 +147,9 @@ class DebtController extends AbstractController
     {
         $this->denyAccessUnlessGranted('DEBT_VIEW', $debt);
 
-        $debtSummary = $this->debtMonitor->getDebtSummaries($debt)[0];
-        $operations  = $this->operationList->getOperationsByDebt($debt);
+        $debts       = new DebtCollection($debt);
+        $debtSummary = $this->debtMonitor->getDebtSummaries($debts)->toArray()[0];
+        $operations  = $this->operationList->getOperationsByDebt($debt)->toArray();
 
         return $this->render('debt/show.html.twig', [
             'debtSummary' => $debtSummary,

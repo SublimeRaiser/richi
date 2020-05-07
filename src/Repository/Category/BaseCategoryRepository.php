@@ -2,8 +2,8 @@
 
 namespace App\Repository\Category;
 
-use App\Entity\Category\BaseCategory;
 use App\Repository\BaseRepository;
+use App\ValueObject\Collection\BaseCategoryCollection;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 abstract class BaseCategoryRepository extends BaseRepository
@@ -13,9 +13,9 @@ abstract class BaseCategoryRepository extends BaseRepository
      *
      * @param UserInterface $user
      *
-     * @return BaseCategory[]
+     * @return BaseCategoryCollection
      */
-    public function findByUser(UserInterface $user): array
+    public function findByUser(UserInterface $user): BaseCategoryCollection
     {
         $result = $this->createQueryBuilder('c')
             ->andWhere('c.user = :user')
@@ -26,7 +26,7 @@ abstract class BaseCategoryRepository extends BaseRepository
 
         $this->sortAsString($result);
 
-        return $result;
+        return new BaseCategoryCollection(...$result);
     }
 
     /**
@@ -35,17 +35,19 @@ abstract class BaseCategoryRepository extends BaseRepository
      *
      * @param UserInterface $user
      *
-     * @return BaseCategory[]
+     * @return BaseCategoryCollection
      */
-    public function findAbleToBeParent(UserInterface $user): array
+    public function findAbleToBeParent(UserInterface $user): BaseCategoryCollection
     {
-        return $this->createQueryBuilder('c')
+        $result = $this->createQueryBuilder('c')
             ->andWhere('c.user = :user')
             ->andWhere('c.parent IS NULL')
             ->setParameter('user', $user)
             ->orderBy('c.name', 'ASC')
             ->getQuery()
             ->getResult();
+
+        return new BaseCategoryCollection(...$result);
     }
 
     /**
@@ -54,11 +56,11 @@ abstract class BaseCategoryRepository extends BaseRepository
      * @param UserInterface $user
      * @param integer       $operationType
      *
-     * @return BaseCategory[]
+     * @return BaseCategoryCollection
      *
      * @see OperationTypeEnum
      */
-    public function findByOperationType(UserInterface $user, int $operationType): array
+    public function findByOperationType(UserInterface $user, int $operationType): BaseCategoryCollection
     {
         $result = $this->createQueryBuilder('c')
             ->andWhere('c.user = :user')
@@ -71,7 +73,7 @@ abstract class BaseCategoryRepository extends BaseRepository
 
         $this->sortAsString($result);
 
-        return $result;
+        return new BaseCategoryCollection(...$result);
     }
 
     /**

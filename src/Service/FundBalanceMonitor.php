@@ -9,6 +9,8 @@ use App\Entity\Operation\OperationIncome;
 use App\Repository\FundRepository;
 use App\Repository\Operation\OperationExpenseRepository;
 use App\Repository\Operation\OperationIncomeRepository;
+use App\ValueObject\Collection\FundCashCollection;
+use App\ValueObject\Collection\FundCollection;
 use App\ValueObject\FundCash;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -33,9 +35,9 @@ class FundBalanceMonitor
      *
      * @param UserInterface $user
      *
-     * @return FundCash[]
+     * @return FundCashCollection
      */
-    public function getBalances(UserInterface $user): array
+    public function getBalances(UserInterface $user): FundCashCollection
     {
         $fundBalances = [];
 
@@ -72,21 +74,22 @@ class FundBalanceMonitor
             $fundBalances[] = $fundBalance;
         }
 
-        return $fundBalances;
+        return new FundCashCollection(...$fundBalances);
     }
 
     /**
      *
      * Calculates total value for the provided balances.
      *
-     * @param FundCash[] $fundBalances
+     * @param FundCashCollection $fundBalances
      *
      * @return integer
      */
-    public function calculateTotal(array $fundBalances): int
+    public function calculateTotal(FundCashCollection $fundBalances): int
     {
         $total = 0;
 
+        /** @var FundCash $fundBalance */
         foreach ($fundBalances as $fundBalance) {
             $total += $fundBalance->getValue();
         }
@@ -97,11 +100,11 @@ class FundBalanceMonitor
     /**
      * Returns an array with income sums for the provided funds.
      *
-     * @param Fund[] $funds
+     * @param FundCollection $funds
      *
-     * @return FundCash[]
+     * @return FundCashCollection
      */
-    private function getIncomeSums(array $funds): array
+    private function getIncomeSums(FundCollection $funds): FundCashCollection
     {
         /** @var OperationIncomeRepository $operationIncomeRepo */
         $operationIncomeRepo = $this->em->getRepository(OperationIncome::class);
@@ -112,11 +115,11 @@ class FundBalanceMonitor
     /**
      * Returns an array with expense sums for the provided funds.
      *
-     * @param Fund[] $funds
+     * @param FundCollection $funds
      *
-     * @return FundCash[]
+     * @return FundCashCollection
      */
-    private function getExpenseSums(array $funds): array
+    private function getExpenseSums(FundCollection $funds): FundCashCollection
     {
         /** @var OperationExpenseRepository $operationExpenseRepo */
         $operationExpenseRepo = $this->em->getRepository(OperationExpense::class);
