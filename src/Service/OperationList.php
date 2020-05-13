@@ -21,7 +21,9 @@ use App\Repository\Operation\OperationIncomeRepository;
 use App\Repository\Operation\OperationLoanRepository;
 use App\Repository\Operation\OperationRepaymentRepository;
 use App\Repository\Operation\OperationTransferRepository;
+use App\ValueObject\Collection\DatedOperationsCollection;
 use App\ValueObject\Collection\Operation\BaseOperationCollection;
+use App\ValueObject\DatedOperations;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -81,12 +83,10 @@ class OperationList
      *
      * @param UserInterface $user
      *
-     * @return BaseOperation[][]
+     * @return DatedOperationsCollection
      */
-    public function getGroupedByDays(UserInterface $user): array
+    public function getDatedOperationsCollection(UserInterface $user): DatedOperationsCollection
     {
-        $groupedOperations = [];
-
         $expenses        = $this->operationExpenseRepo->findByUser($user);
         $incomes         = $this->operationIncomeRepo->findByUser($user);
         $transfers       = $this->operationTransferRepo->findByUser($user);
@@ -96,25 +96,34 @@ class OperationList
         $loans           = $this->operationLoanRepo->findByUser($user);
         $debtCollections = $this->operationDebtCollectionRepo->findByUser($user);
 
-        $allOperations = array_merge(
-            $expenses->toArray(),
-            $incomes->toArray(),
-            $transfers->toArray(),
-            $debts->toArray(),
-            $repayments->toArray(),
-            $debtReliefs->toArray(),
-            $loans->toArray(),
-            $debtCollections->toArray()
+        $allOperations = new BaseOperationCollection(
+            ...$expenses->toArray(),
+            ...$incomes->toArray(),
+            ...$transfers->toArray(),
+            ...$debts->toArray(),
+            ...$repayments->toArray(),
+            ...$debtReliefs->toArray(),
+            ...$loans->toArray(),
+            ...$debtCollections->toArray()
         );
-        usort($allOperations, [$this, 'sortByDate']);
 
+        $datedOperations = [];
         /** @var BaseOperation $operation */
         foreach ($allOperations as $operation) {
-            $operationDate                       = $operation->getDate()->getTimestamp();
-            $groupedOperations[$operationDate][] = $operation;
+            // Operation date timestamp is used as an array key to group operations with the same date
+            $operationDateTimestamp = $operation->getDate()->getTimestamp();
+            if (!array_key_exists($operationDateTimestamp, $datedOperations)) {
+                $datedOperations[$operationDateTimestamp] = $this->initDatedOperations($operation);
+            } else {
+                $datedOperations[$operationDateTimestamp] =
+                    $this->replenishDatedOperations($datedOperations[$operationDateTimestamp], $operation);
+            }
         }
 
-        return $groupedOperations;
+        $datedOperationsCollection = new DatedOperationsCollection(...$datedOperations);
+        $datedOperationsCollection = $datedOperationsCollection->sortByDate();
+
+        return $datedOperationsCollection;
     }
 
     /**
@@ -164,5 +173,39 @@ class OperationList
         }
 
         return 0;
+    }
+
+    /**
+     * Initializes a dated operations with the given operation.
+     *
+     * @param BaseOperation $operation
+     *
+     * @return DatedOperations
+     */
+    private function initDatedOperations(BaseOperation $operation): DatedOperations
+    {
+        $operationDate = $operation->getDate();
+
+        return new DatedOperations($operationDate, new BaseOperationCollection($operation));
+    }
+
+    /**
+     * Replenishes the existing dated operations with the given operation.
+     *
+     * @param DatedOperations $existingOperations
+     * @param BaseOperation   $operation
+     *
+     * @return DatedOperations
+     */
+    private function replenishDatedOperations(
+        DatedOperations $existingOperations,
+        BaseOperation $operation
+    ): DatedOperations {
+        $operationDate = $operation->getDate();
+
+        return new DatedOperations(
+            $operationDate,
+            new BaseOperationCollection($operation, ...$existingOperations->getOperations()->toArray())
+        );
     }
 }

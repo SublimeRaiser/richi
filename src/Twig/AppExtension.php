@@ -63,21 +63,20 @@ class AppExtension extends AbstractExtension
     }
 
     /**
-     * Returns a human-readable representation of the date provided as a timestamp.
+     * Returns a human-readable representation of the date.
      *
-     * @param integer $timestamp
+     * @param DateTime $date
      *
      * @return string
      *
      * @throws Exception
      */
-    public function formatDateForHumans(int $timestamp): string
+    public function formatDateForHumans(DateTime $date): string
     {
         $userTimezone    = new DateTimeZone('Asia/Novosibirsk');       // TODO refactor to get from user settings
         $dateFormatFull  = 'F d, Y';                                    // TODO refactor to get from user settings
         $dateFormatShort = 'F d';                                       // TODO refactor to get from user settings
 
-        $date            = DateTime::createFromFormat('U', $timestamp);
         $date->setTimezone($userTimezone);
 
         $today           = new DateTime('now', $userTimezone);
@@ -85,7 +84,7 @@ class AppExtension extends AbstractExtension
         $dateYear        = $date->format('Y');
         $todayYear       = $today->format('Y');
         $dateFormat      = $dateYear === $todayYear ? $dateFormatShort : $dateFormatFull;
-        $formattedDate   = date($dateFormat, $timestamp);
+        $formattedDate   = date($dateFormat, $date->getTimestamp());
 
         $dateString      = $date->format($dateFormatFull);
         $todayString     = $today->format($dateFormatFull);

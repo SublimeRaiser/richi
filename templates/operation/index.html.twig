@@ -9,12 +9,12 @@
         Incomes: {{ incomeSum|currency }}
     </p>
     <div>
-        {% for operationDate, operationGroup in groupedOperations %}
+        {% for datedOperations in datedOperationsCollection %}
             <div class="date-header">
-                {{ operationDate|date_human }}
+                {{ datedOperations.date|date_human }}
             </div>
             <div>
-                {% for operation in operationGroup %}
+                {% for operation in datedOperations.operations %}
                     {% include('operation/_index_item.html.twig') %}
                 {% endfor %}
             </div>

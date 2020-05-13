@@ -15,7 +15,7 @@
                 {% set typeRepayment  = operation|instance_of('App\\Entity\\Operation\\OperationRepayment') %}
                 {% set typeDebtRelief = operation|instance_of('App\\Entity\\Operation\\OperationDebtRelief') %}
                 <tr>
-                    <td>{{ operation.date.timestamp|date_human }}</td>
+                    <td>{{ operation.date|date_human }}</td>
                     <td>
                         {% if typeDebt %}       debt        {% endif %}
                         {% if typeRepayment %}  repayment   {% endif %}

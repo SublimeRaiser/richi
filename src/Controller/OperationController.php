@@ -65,8 +65,8 @@ class OperationController extends AbstractController
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
 
-        $user              = $this->getUser();
-        $groupedOperations = $this->operationList->getGroupedByDays($user);
+        $user                      = $this->getUser();
+        $datedOperationsCollection = $this->operationList->getDatedOperationsCollection($user);
 
         /** @var OperationExpenseRepository $operationExpenseRepo */
         $operationExpenseRepo = $this->getDoctrine()->getRepository(OperationExpense::class);
@@ -76,9 +76,9 @@ class OperationController extends AbstractController
         $incomeSum            = $operationIncomeRepo->getUserCashFlowSum($user);
 
         return $this->render('operation/index.html.twig', [
-            'groupedOperations' => $groupedOperations,
-            'expenseSum'        => $expenseSum,
-            'incomeSum'         => $incomeSum,
+            'datedOperationsCollection' => $datedOperationsCollection,
+            'expenseSum'                => $expenseSum,
+            'incomeSum'                 => $incomeSum,
         ]);
     }
 
