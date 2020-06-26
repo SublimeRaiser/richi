@@ -70,10 +70,10 @@ class OperationController extends AbstractController
 
         /** @var OperationExpenseRepository $operationExpenseRepo */
         $operationExpenseRepo = $this->getDoctrine()->getRepository(OperationExpense::class);
-        $expenseSum           = $operationExpenseRepo->getUserCashFlowSum($user);
+        $expenseSum           = $operationExpenseRepo->getUserCashFlowSum30Days($user);
         /** @var OperationIncomeRepository $operationIncomeRepo */
         $operationIncomeRepo  = $this->getDoctrine()->getRepository(OperationIncome::class);
-        $incomeSum            = $operationIncomeRepo->getUserCashFlowSum($user);
+        $incomeSum            = $operationIncomeRepo->getUserCashFlowSum30Days($user);
 
         return $this->render('operation/index.html.twig', [
             'datedOperationsCollection' => $datedOperationsCollection,

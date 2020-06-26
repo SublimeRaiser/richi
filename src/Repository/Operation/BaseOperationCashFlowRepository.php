@@ -6,6 +6,7 @@ use App\Entity\Fund;
 use App\ValueObject\Collection\FundCashCollection;
 use App\ValueObject\Collection\FundCollection;
 use App\ValueObject\FundCash;
+use DateTime;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -22,13 +23,38 @@ abstract class BaseOperationCashFlowRepository extends BaseOperationRepository
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    public function getUserCashFlowSum(UserInterface $user): int
+    public function getUserCashFlowSumAll(UserInterface $user): int
     {
         $result = $this->createQueryBuilder('o')
             ->select('SUM(o.amount)')
             ->andWhere('o.user = :user')
             ->andWhere('o.fund IS NULL')
             ->setParameter('user', $user)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return $result ?? 0;
+    }
+
+    /**
+     * Returns sum for the cash flows during the last 30 days.
+     *
+     * @param UserInterface $user
+     *
+     * @return integer
+     *
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     */
+    public function getUserCashFlowSum30Days(UserInterface $user): int
+    {
+        $result = $this->createQueryBuilder('o')
+            ->select('SUM(o.amount)')
+            ->andWhere('o.user = :user')
+            ->andWhere('o.fund IS NULL')
+            ->andWhere('o.date >= :startDate')
+            ->setParameter('user', $user)
+            ->setParameter('startDate', new DateTime('-30 days'))
             ->getQuery()
             ->getSingleScalarResult();
 
