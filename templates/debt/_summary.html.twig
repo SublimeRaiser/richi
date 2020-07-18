@@ -1,12 +1,12 @@
 <p>{{ debtSummary.debt.person.name }}</p>
-<p>Date: {{ debtSummary.date|date_human }}</p>
-<p>Amount: {{ debtSummary.amount|currency }},
-    repayment: {{ debtSummary.repayment|currency }},
-    {% if debtSummary.relief != 0 %} relief: {{ debtSummary.relief|currency }}, {% endif %}
-    remaining: {{ debtSummary.remaining|currency }}</p>
-{% if debtSummary.debt.dueDate is not null %}
-    <p>Due date: {{ debtSummary.debt.dueDate|date_human }}</p>
-{% endif %}
 {% if debtSummary.debt.description is not empty %}
     <p>Description: {{ debtSummary.debt.description }}</p>
 {% endif %}
+{% if debtSummary.debt.dueDate is not null %}
+    <p>Due date: {{ debtSummary.debt.dueDate|date_human }}</p>
+{% endif %}
+<p>Amount: {{ debtSummary.amount|currency }},
+    repayment: {{ debtSummary.repayment|currency }},
+    {% if debtSummary.relief != 0 %} relief: {{ debtSummary.relief|currency }}, {% endif %}
+    remaining: {{ debtSummary.remaining|currency }}
+</p>

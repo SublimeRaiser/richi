@@ -5,7 +5,10 @@
 {% block body %}
     <h1>Edit debt:</h1>
     {{ form_start(debtForm) }}
-        {{ form_widget(debtForm) }}
+        {{ form_row(debtForm.person) }}
+        {{ form_row(debtForm.description) }}
+        {{ form_row(debtForm.dueDate) }}
+        {{ form_row(debtForm._token) }}
         <button type="submit">Save changes</button>
-    {{ form_end(debtForm) }}
+    {{ form_end(debtForm, {'render_rest': false}) }}
 {% endblock %}

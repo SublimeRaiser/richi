@@ -7,7 +7,11 @@
         <a href="{{ path('debt_new') }}">Add debt</a>
     </div>
     {% for debtSummary in debtSummaries %}
+        <p>Date: {{ debtSummary.date|date_human }}</p>
         {{ include('debt/_summary.html.twig') }}
+        <p>
+            <a href="{{ path('debt_show', {'id': debtSummary.debt.id}) }}">View</a>
+        </p>
         <hr>
     {% else %}
         <p>Congrats! There are not debts.</p>

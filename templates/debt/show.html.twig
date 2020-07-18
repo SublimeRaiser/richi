@@ -5,6 +5,9 @@
 {% block body %}
     <div style="width: 50%; height: 500px; float: left;">
         {{ include('debt/_summary.html.twig') }}
+        <p>
+            <a href="{{ path('debt_edit', {'id': debtSummary.debt.id}) }}">Edit</a>
+        </p>
     </div>
     <div style="width: 50%; height: 500px; float: right;">
         <p>Operations:</p>
