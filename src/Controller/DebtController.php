@@ -178,7 +178,7 @@ class DebtController extends AbstractController
             $this->em->persist($debt);
             $this->em->flush();
 
-            return $this->redirectToRoute('debt_index');
+            return $this->redirectToRoute('debt_show', ['id' => $debt->getId()]);
         }
 
         return $this->render('debt/edit.html.twig', [
