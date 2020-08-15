@@ -47,7 +47,7 @@ class DebtMonitor
     }
 
     /**
-     * Returns an array with summaries for the debts.
+     * Returns a collection with summaries for the debts.
      *
      * @param DebtCollection $debts
      *
@@ -68,7 +68,7 @@ class DebtMonitor
             $relief    = 0;
             $remaining = 0;
 
-            // Get date for debt
+            // Get date for the debt
             foreach ($debtDates as $debtDate) {
                 if ($debtDate->getDebt() !== $debt) {
                     continue;

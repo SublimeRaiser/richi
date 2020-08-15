@@ -5,8 +5,11 @@
 {% if debtSummary.debt.dueDate is not null %}
     <p>Due date: {{ debtSummary.debt.dueDate|date_human }}</p>
 {% endif %}
-<p>Amount: {{ debtSummary.amount|currency }},
-    repayment: {{ debtSummary.repayment|currency }},
-    {% if debtSummary.relief != 0 %} relief: {{ debtSummary.relief|currency }}, {% endif %}
-    remaining: {{ debtSummary.remaining|currency }}
+<p>
+    Amount: {{ debtSummary.amount|currency }}
+    {%- if debtSummary.repayment != 0 -%}, repayment: {{ debtSummary.repayment|currency }}{%- endif -%}
+    {%- if debtSummary.relief != 0 -%}, relief: {{ debtSummary.relief|currency }}{%- endif -%}
+    {%- if debtSummary.amount != debtSummary.remaining -%},
+        <span class="{% if debtSummary.remaining < 0 %}error{% endif %}">remaining: {{ debtSummary.remaining|currency }}</span>
+    {%- endif -%}
 </p>

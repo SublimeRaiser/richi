@@ -10,7 +10,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class OperationDebtType extends BaseOperationObligationType
+class OperationDebtType extends BaseOperationType
 {
     /**
      * {@inheritdoc}

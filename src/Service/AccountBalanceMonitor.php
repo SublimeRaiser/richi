@@ -41,7 +41,7 @@ class AccountBalanceMonitor
     }
 
     /**
-     * Returns array of account balances.
+     * Returns a collection of account balances.
      *
      * @param UserInterface $user
      *
@@ -107,7 +107,7 @@ class AccountBalanceMonitor
     }
 
     /**
-     * Returns an array with inflow sums for the provided accounts.
+     * Returns a collection with inflow sums for the provided accounts.
      *
      * @param AccountCollection $accounts
      *
@@ -140,7 +140,7 @@ class AccountBalanceMonitor
     }
 
     /**
-     * Returns an array with outflow sums for the provided accounts.
+     * Returns a collection with outflow sums for the provided accounts.
      *
      * @param AccountCollection $accounts
      *

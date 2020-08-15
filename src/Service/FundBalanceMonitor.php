@@ -31,7 +31,7 @@ class FundBalanceMonitor
     }
 
     /**
-     * Returns array of fund balances.
+     * Returns a collection of fund balances.
      *
      * @param UserInterface $user
      *
@@ -98,7 +98,7 @@ class FundBalanceMonitor
     }
 
     /**
-     * Returns an array with income sums for the provided funds.
+     * Returns a collection with income sums for the provided funds.
      *
      * @param FundCollection $funds
      *
@@ -113,7 +113,7 @@ class FundBalanceMonitor
     }
 
     /**
-     * Returns an array with expense sums for the provided funds.
+     * Returns a collection with expense sums for the provided funds.
      *
      * @param FundCollection $funds
      *

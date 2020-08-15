@@ -3,7 +3,7 @@
 {% block title %}Show debt{% endblock %}
 
 {% block body %}
-    <div style="width: 50%; height: 500px; float: left;">
+    <div class="debt-summary" style="width: 50%; height: 500px; float: left;">
         {{ include('debt/_summary.html.twig') }}
         <p>
             <a href="{{ path('debt_edit', {'id': debtSummary.debt.id}) }}">Edit</a>
@@ -11,27 +11,55 @@
     </div>
     <div style="width: 50%; height: 500px; float: right;">
         <p>Operations:</p>
-        <table>
-            <tbody>
+        <div>
             {% for operation in operations %}
                 {% set typeDebt       = operation|instance_of('App\\Entity\\Operation\\OperationDebt') %}
                 {% set typeRepayment  = operation|instance_of('App\\Entity\\Operation\\OperationRepayment') %}
                 {% set typeDebtRelief = operation|instance_of('App\\Entity\\Operation\\OperationDebtRelief') %}
-                <tr>
-                    <td>{{ operation.date|date_human }}</td>
-                    <td>
+                <div class="operation-item">
+                    <span>{{ operation.date|date_human }}</span>
+                    <span>
                         {% if typeDebt %}       debt        {% endif %}
                         {% if typeRepayment %}  repayment   {% endif %}
                         {% if typeDebtRelief %} debt relief {% endif %}
-                    </td>
-                    <td style="text-align: right">{{ operation.amount|currency }}</td>
-                    <td>
+                    </span>
+                    <span style="text-align: right">{{ operation.amount|currency }}</span>
+                    {% if operation.description is not null %}
+                        <span>
+                            ({{ operation.description }})
+                        </span>
+                    {% endif %}
+                    <span>
                         {% if typeDebt %}      {{ operation.target.name }} {% endif %}
                         {% if typeRepayment %} {{ operation.source.name }} {% endif %}
-                    </td>
-                </tr>
+                        <p class="operation-toolbar">
+                            {% if typeDebt %}       {% set operationSlug = 'debt' %}        {% endif %}
+                            {% if typeRepayment %}  {% set operationSlug = 'repayment' %}   {% endif %}
+                            {% if typeDebtRelief %} {% set operationSlug = 'debt-relief' %} {% endif %}
+                            <a href="{{ path('operation_edit', {'id': operation.id, 'operationSlug': operationSlug}) }}">Edit</a> |
+                            <a href="{{ path('operation_copy', {'id': operation.id, 'operationSlug': operationSlug}) }}">Copy</a> |
+                            <a href="#"
+                               class="js-operation-delete"
+                               data-url="{{ path('operation_delete', {'id': operation.id, 'operationSlug': operationSlug}) }}"
+                               data-description="{{ operation.description }}"
+                               data-amount="{{ operation.amount|currency }}">Delete</a>
+                        </p>
+                    </span>
+                </div>
             {% endfor %}
-            </tbody>
-        </table>
+        </div>
     </div>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+
+    {{ encore_entry_link_tags('debt') }}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    {{ encore_entry_script_tags('debt') }}
+    {{ encore_entry_script_tags('operation') }}
 {% endblock %}

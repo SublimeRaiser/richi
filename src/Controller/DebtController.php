@@ -113,7 +113,6 @@ class DebtController extends AbstractController
             $operationDebt->setTarget($target);
             $operationDebt->setAmount($amount);
             $operationDebt->setDebt($debt);
-            $operationDebt->setUser($user);
             $operationErrors = $this->validator->validate($operationDebt);
 
             if ($form->isValid() && count($operationErrors) == 0) {

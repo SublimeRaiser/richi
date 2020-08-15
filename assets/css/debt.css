@@ -1,0 +1,21 @@
+.debt-summary.fully-paid {
+    opacity: .25;
+}
+.debt-summary .error {
+    color: red;
+}
+.operation-item {
+    position: relative;
+    padding-left: 0;
+    padding-right: 50px;
+}
+.operation-toolbar {
+    display: none;
+    position: absolute;
+    top: -13px;
+    padding-left: 20px;
+    font-size: small;
+}
+.operation-item:hover .operation-toolbar {
+    display: inherit;
+}

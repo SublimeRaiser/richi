@@ -1,9 +1,9 @@
 {{ form_start(operationForm) }}
     {{ form_row(operationForm.date) }}
-    {{ form_row(operationForm.person) }}
     {{ form_row(operationForm.source) }}
     {{ form_row(operationForm.amount) }}
     {{ form_row(operationForm.description) }}
     {{ form_row(operationForm._token) }}
+    <input type="hidden" name="referer" value="{{app.request.headers.get('referer')}}">
     <button type="submit">Save</button>
 {{ form_end(operationForm) }}

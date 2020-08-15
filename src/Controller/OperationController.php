@@ -3,11 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\Operation\BaseOperation;
-use App\Entity\Operation\OperationExpense;
-use App\Entity\Operation\OperationIncome;
+use App\Entity\Operation\OperationDebt;
 use App\Repository\Category\BaseCategoryRepository;
-use App\Repository\Operation\OperationExpenseRepository;
-use App\Repository\Operation\OperationIncomeRepository;
+use App\Repository\Operation\OperationDebtRepository;
+use App\Service\TotalsMonitor;
 use App\Service\OperationList;
 use App\Service\OperationNameFormatter;
 use Doctrine\ORM\EntityManagerInterface;
@@ -36,21 +35,27 @@ class OperationController extends AbstractController
     /** @var OperationList */
     private $operationList;
 
+    /** @var TotalsMonitor */
+    private $totalsMonitor;
+
     /**
      * OperationController constructor.
      *
      * @param EntityManagerInterface $em
      * @param OperationNameFormatter $operationNameFormatter
      * @param OperationList          $operationList
+     * @param TotalsMonitor          $totalsMonitor
      */
     public function __construct(
         EntityManagerInterface $em,
         OperationNameFormatter $operationNameFormatter,
-        OperationList $operationList
+        OperationList $operationList,
+        TotalsMonitor $totalsMonitor
     ) {
         $this->em                     = $em;
         $this->operationNameFormatter = $operationNameFormatter;
         $this->operationList          = $operationList;
+        $this->totalsMonitor          = $totalsMonitor;
     }
 
     /**
@@ -68,12 +73,8 @@ class OperationController extends AbstractController
         $user                      = $this->getUser();
         $datedOperationsCollection = $this->operationList->getDatedOperationsCollection($user);
 
-        /** @var OperationExpenseRepository $operationExpenseRepo */
-        $operationExpenseRepo = $this->getDoctrine()->getRepository(OperationExpense::class);
-        $expenseSum           = $operationExpenseRepo->getUserCashFlowSum30Days($user);
-        /** @var OperationIncomeRepository $operationIncomeRepo */
-        $operationIncomeRepo  = $this->getDoctrine()->getRepository(OperationIncome::class);
-        $incomeSum            = $operationIncomeRepo->getUserCashFlowSum30Days($user);
+        $expenseSum = $this->totalsMonitor->getExpenseSumLast30Days($user);
+        $incomeSum  = $this->totalsMonitor->getIncomeSumLast30Days($user);
 
         return $this->render('operation/index.html.twig', [
             'datedOperationsCollection' => $datedOperationsCollection,
@@ -157,7 +158,10 @@ class OperationController extends AbstractController
             $this->em->persist($clonedOperation);
             $this->em->flush();
 
-            return $this->redirectToRoute('operation_index');
+            $referer  = $request->request->get('referer');
+            $response = $referer ? $this->redirect($referer) : $this->redirectToRoute('operation_index');
+
+            return $response;
         }
 
         return $this->render('operation/copy.html.twig', [
@@ -197,7 +201,10 @@ class OperationController extends AbstractController
             $this->em->persist($operation);
             $this->em->flush();
 
-            return $this->redirectToRoute('operation_index');
+            $referer  = $request->request->get('referer');
+            $response = $referer ? $this->redirect($referer) : $this->redirectToRoute('operation_index');
+
+            return $response;
         }
 
         return $this->render('operation/edit.html.twig', [
@@ -226,12 +233,21 @@ class OperationController extends AbstractController
         $operation = $this->findOperation($operationType, $id);
         $this->denyAccessUnlessGranted('OPERATION_DELETE', $operation);
 
-        $this->em->remove($operation);
-        $this->em->flush();
 
-        return new JsonResponse([       // TODO fix it
-            'data' => 'Operation deleted successfully',
-        ]);
+        if ($this->isDeletionPossible($operation)) {
+            $this->em->remove($operation);
+            $this->em->flush();
+
+            $response = new JsonResponse([       // TODO fix it
+                'data' => 'Operation deleted successfully',
+            ]);
+        } else {
+            $response = new JsonResponse([
+                'data' => 'Deletion can\'t be done'
+            ], Response::HTTP_CONFLICT);
+        }
+
+        return $response;
     }
 
     /**
@@ -316,5 +332,29 @@ class OperationController extends AbstractController
         if (!class_exists($operationClassName)) {
             throw new BadRequestHttpException('Unsupported operation type.');
         }
+    }
+
+    /**
+     * Checks whether the deletion of the provided operation can be done.
+     *
+     * @param BaseOperation $operation
+     *
+     * @return boolean
+     */
+    private function isDeletionPossible(BaseOperation $operation)
+    {
+        $isDeletionPossible = true;
+
+        if ($operation instanceof OperationDebt) {
+            /** @var OperationDebtRepository $operationDeptRepo */
+            $operationDeptRepo = $this->em->getRepository(OperationDebt::class);
+            $debt              = $operation->getDebt();
+            $allDebtOperations = $operationDeptRepo->findByDebt($debt);
+//            foreach ($allDebtOperations as $debtOperation) {
+//
+//            }
+        }
+
+        return $isDeletionPossible;
     }
 }

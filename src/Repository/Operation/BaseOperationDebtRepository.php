@@ -7,9 +7,29 @@ use App\ValueObject\Collection\DebtCashCollection;
 use App\ValueObject\Collection\DebtCollection;
 use App\ValueObject\Collection\Operation\BaseOperationCollection;
 use App\ValueObject\DebtCash;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 abstract class BaseOperationDebtRepository extends BaseOperationRepository
 {
+   /**
+     * Returns an operation list.
+     *
+     * @param UserInterface $user
+     *
+     * @return BaseOperationCollection
+     */
+    public function findByUser(UserInterface $user): BaseOperationCollection
+    {
+        $result = $this->createQueryBuilder('o')
+            ->leftJoin('o.debt', 'd')
+            ->andWhere('d.user = :user')
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getResult();
+
+        return new BaseOperationCollection(...$result);
+    }
+
     /**
      * Calculates the sum of all the cash flows for each of the debts provided.
      *
@@ -44,7 +64,7 @@ abstract class BaseOperationDebtRepository extends BaseOperationRepository
     }
 
     /**
-     * Returns an array of operations related to the debt.
+     * Returns a collection of operations related to the debt.
      *
      * @param Debt $debt
      *

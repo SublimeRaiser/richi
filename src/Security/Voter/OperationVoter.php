@@ -3,6 +3,9 @@
 namespace App\Security\Voter;
 
 use App\Entity\Operation\BaseOperation;
+use App\Entity\Operation\BaseOperationCashFlow;
+use App\Entity\Operation\BaseOperationDebt;
+use App\Entity\Operation\BaseOperationLoan;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -28,7 +31,13 @@ class OperationVoter extends Voter
             case 'OPERATION_EDIT':
             case 'OPERATION_COPY':
             case 'OPERATION_DELETE':
-                if ($subject->getUser() === $user) {
+                if ($subject instanceof BaseOperationCashFlow && $subject->getUser() === $user) {
+                    return true;
+                }
+                if ($subject instanceof BaseOperationDebt && $subject->getDebt()->getUser() === $user) {
+                    return true;
+                }
+                if ($subject instanceof BaseOperationLoan && $subject->getLoan()->getUser() === $user) {
                     return true;
                 }
                 

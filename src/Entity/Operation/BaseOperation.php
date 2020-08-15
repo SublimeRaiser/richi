@@ -26,14 +26,6 @@ abstract class BaseOperation
     protected $id;
 
     /**
-     * @var UserInterface
-     *
-     * @ORM\ManyToOne(targetEntity="App\Entity\User")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    protected $user;
-
-    /**
      * @var DateTimeInterface
      *
      * @ORM\Column(name="`date`", type="date")
@@ -97,26 +89,6 @@ abstract class BaseOperation
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    /**
-     * @return UserInterface|null
-     */
-    public function getUser(): ?UserInterface
-    {
-        return $this->user;
-    }
-
-    /**
-     * @param UserInterface|null $user
-     *
-     * @return self
-     */
-    public function setUser(?UserInterface $user): self
-    {
-        $this->user = $user;
-
-        return $this;
     }
 
     /**

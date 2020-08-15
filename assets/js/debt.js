@@ -1,3 +1,5 @@
+import '../css/debt.css';
+
 document.addEventListener('DOMContentLoaded', function () {
 
     document.addEventListener('click', function (event) {

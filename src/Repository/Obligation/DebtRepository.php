@@ -27,6 +27,7 @@ class DebtRepository extends BaseRepository
         $result = $this->createQueryBuilder('d')
             ->andWhere('d.user = :user')
             ->setParameter('user', $user)
+//            ->addOrderBy('d.date', 'DESC')    // TODO add ordering by date
             ->addOrderBy('d.createdAt', 'DESC')
             ->getQuery()
             ->getResult();

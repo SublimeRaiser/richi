@@ -23,7 +23,7 @@ abstract class BaseOperationCashFlowRepository extends BaseOperationRepository
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    public function getUserCashFlowSumAll(UserInterface $user): int
+    public function getCashFlowSumAll(UserInterface $user): int
     {
         $result = $this->createQueryBuilder('o')
             ->select('SUM(o.amount)')
@@ -46,7 +46,7 @@ abstract class BaseOperationCashFlowRepository extends BaseOperationRepository
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    public function getUserCashFlowSum30Days(UserInterface $user): int
+    public function getCashFlowSum30Days(UserInterface $user): int
     {
         $result = $this->createQueryBuilder('o')
             ->select('SUM(o.amount)')
